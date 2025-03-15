@@ -9,72 +9,72 @@ export type ClothingItem = {
 export default function Display() {
     const clothingItems: ClothingItem[] = [
         {
-            imgPath: './public/jacket.png',
+            imgPath: '/jacket.png',
             title: 'Cozy Hoodie',
             tags: ['hoodie', 'casual', 'winter', 'comfortable'],
         },
         {
-            imgPath: './public/jacket.png',
+            imgPath: '/jacket.png',
             title: 'Basic T-Shirt',
             tags: ['t-shirt', 'casual', 'summer', 'comfortable'],
         },
         {
-            imgPath: './public/jacket.png',
+            imgPath: '/jacket.png',
             title: 'Leather Jacket',
             tags: ['jacket', 'stylish', 'night-out', 'fall'],
         },
         {
-            imgPath: './public/jacket.png',
+            imgPath: '/jacket.png',
             title: 'Evening Dress',
             tags: ['dress', 'formal', 'night-out', 'elegant'],
         },
         {
-            imgPath: './public/jacket.png',
+            imgPath: '/jacket.png',
             title: 'Blue Jeans',
             tags: ['jeans', 'casual', 'comfortable', 'everyday'],
         },
         {
-            imgPath: './public/jacket.png',
+            imgPath: '/jacket.png',
             title: 'Running Sneakers',
             tags: ['sneakers', 'sport', 'comfortable', 'active'],
         },
         {
-            imgPath: './public/jacket.png',
+            imgPath: '/jacket.png',
             title: 'Knitted Sweater',
             tags: ['sweater', 'winter', 'comfortable', 'cozy'],
         },
         {
-            imgPath: './public/jacket.png',
+            imgPath: '/jacket.png',
             title: 'Floral Skirt',
             tags: ['skirt', 'summer', 'casual', 'feminine'],
         },
         {
-            imgPath: './public/jacket.png',
+            imgPath: '/jacket.png',
             title: 'Silk Blouse',
             tags: ['blouse', 'formal', 'elegant', 'work'],
         },
         {
-            imgPath: './public/jacket.png',
+            imgPath: '/jacket.png',
             title: 'Cargo Shorts',
             tags: ['shorts', 'summer', 'casual', 'comfortable'],
         },
         {
-            imgPath: './public/jacket.png',
+            imgPath: '/jacket.png',
             title: 'Knitted Sweater',
             tags: ['sweater', 'winter', 'comfortable', 'cozy'],
         },
         {
-            imgPath: './public/jacket.png',
+            imgPath: '/jacket.png',
             title: 'Floral Skirt',
             tags: ['skirt', 'summer', 'casual', 'feminine'],
         },
         {
-            imgPath: './public/jacket.png',
+            imgPath: '/jacket.png',
             title: 'Silk Blouse',
             tags: ['blouse', 'formal', 'elegant', 'work'],
         },
         {
-            imgPath: './public/jacket.png',
+            imgPath: '/jacket.png',
             title: 'Cargo Shorts',
             tags: ['shorts', 'summer', 'casual', 'comfortable'],
         },

@@ -8,7 +8,8 @@ export type DropdownProps = {
 };
 
 export default function Dropdown({ label, items }: DropdownProps) {
-    const [selectedOption, setSelectedOption] = useState(items[0]);
+    const defaultOption = 'Any';
+    const [selectedOption, setSelectedOption] = useState(defaultOption);
     const [optionsVisible, setOptionsVisible] = useState(false);
 
     const toggleDropdown = () => {
@@ -44,6 +45,13 @@ export default function Dropdown({ label, items }: DropdownProps) {
             <div
                 className='flex bg-white border-2 border-black flex-col w-full h-40 rounded-lg overflow-scroll'
                 hidden={!optionsVisible}>
+                <p
+                    className='flex p-2 justify-center w-full text-gray-500 hover:bg-gray-200 cursor-pointer'
+                    onClick={() => {
+                        selectOption(defaultOption);
+                    }}>
+                    {defaultOption}
+                </p>
                 {optionsList}
             </div>
         </div>
