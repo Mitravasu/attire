@@ -1,5 +1,9 @@
 @import 'tailwindcss';
 
 @theme {
-    --font-display: 'JetBrains Mono';
+	--font-display: 'JetBrains Mono';
+
+	--color-primary: #393e41;
+	--color-secondary: #f6f7eb;
+	--color-accent: #e94f37;
 }
