@@ -7,6 +7,7 @@ import fs from 'fs';
 import {
 	InventoryItem,
 	InventoryRequest,
+	EditInventoryRequest,
 	StatusUpdateRequest,
 	DeleteRequest,
 	MulterError,
@@ -189,6 +190,103 @@ app.post(
 	}
 );
 
+// Update inventory item
+app.put(
+	'/api/inventory/:id',
+	upload.single('image'),
+	(req: EditInventoryRequest, res: Response): void => {
+		try {
+			const id: number = parseInt(req.params.id, 10);
+			const { title, tags, status } = req.body;
+
+			// Check if item exists
+			const existingItem = InventoryService.getItemById(id);
+			if (!existingItem) {
+				res.status(404).json({
+					error: 'Inventory item not found',
+				});
+				return;
+			}
+
+			// Validate title if provided
+			if (
+				title !== undefined &&
+				(typeof title !== 'string' || title.trim() === '')
+			) {
+				res.status(400).json({
+					error: 'Title must be a non-empty string if provided',
+				});
+				return;
+			}
+
+			// Parse and validate tags if provided
+			let parsedTags: string[] | undefined;
+			if (tags !== undefined) {
+				try {
+					if (typeof tags === 'string') {
+						parsedTags = tags
+							.split(',')
+							.map((tag: string) => tag.trim())
+							.filter((tag: string) => tag !== '');
+					} else if (Array.isArray(tags)) {
+						parsedTags = tags
+							.map((tag: any) => tag.toString().trim())
+							.filter((tag: string) => tag !== '');
+					} else {
+						throw new Error('Invalid tags format');
+					}
+				} catch (error) {
+					res.status(400).json({
+						error: 'Tags must be a comma-separated string or an array if provided',
+					});
+					return;
+				}
+			}
+
+			// Validate status if provided
+			if (status !== undefined && !isValidStatus(status)) {
+				res.status(400).json({
+					error: 'Status must be one of: dirty, washed, ironed if provided',
+				});
+				return;
+			}
+
+			// Handle image update
+			let imgUrl: string | undefined;
+			if (req.file) {
+				imgUrl = `/uploads/${req.file.filename}`;
+			}
+
+			// Update the inventory item
+			const updatedItem: InventoryItem | null =
+				InventoryService.updateItem(
+					id,
+					title?.trim(),
+					imgUrl,
+					parsedTags,
+					status?.toLowerCase() as ValidStatus
+				);
+
+			if (!updatedItem) {
+				res.status(404).json({
+					error: 'Inventory item not found',
+				});
+				return;
+			}
+
+			res.json({
+				message: 'Inventory item updated successfully',
+				item: updatedItem,
+			});
+		} catch (error) {
+			console.error('Error updating inventory item:', error);
+			res.status(500).json({
+				error: 'Internal server error while updating inventory item',
+			});
+		}
+	}
+);
+
 // Delete inventory item by ID
 app.delete('/api/inventory/:id', (req: DeleteRequest, res: Response): void => {
 	try {
@@ -295,6 +393,7 @@ app.listen(PORT, () => {
 	console.log(`API endpoints:`);
 	console.log(`  GET    /api/inventory     - Get all inventory items`);
 	console.log(`  POST   /api/inventory     - Add new inventory item`);
+	console.log(`  PUT    /api/inventory/:id - Update inventory item`);
 	console.log(`  DELETE /api/inventory/:id - Delete inventory item`);
 	console.log(`  PATCH  /api/inventory/:id/status - Update item status`);
 });

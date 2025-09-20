@@ -27,6 +27,17 @@ export interface StatusUpdateRequest extends Request {
 	};
 }
 
+export interface EditInventoryRequest extends Request {
+	params: {
+		id: string;
+	};
+	body: {
+		title?: string;
+		tags?: string | string[];
+		status?: string;
+	};
+}
+
 export interface DeleteRequest extends Request {
 	params: {
 		id: string;

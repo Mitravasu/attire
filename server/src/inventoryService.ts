@@ -64,6 +64,18 @@ export class InventoryService {
 		return this._deleteStatement;
 	}
 
+	private static _updateItemStatement: any = null;
+	private static get updateItemStatement() {
+		if (!this._updateItemStatement) {
+			this._updateItemStatement = db.prepare(`
+				UPDATE inventory
+				SET title = ?, imgUrl = ?, tags = ?, status = ?, updatedAt = ?
+				WHERE id = ?
+			`);
+		}
+		return this._updateItemStatement;
+	}
+
 	// Create a new inventory item
 	static createItem(
 		title: string,
@@ -144,6 +156,51 @@ export class InventoryService {
 			throw new Error(
 				'Database error while updating inventory item status'
 			);
+		}
+	}
+
+	// Update entire inventory item (except image URL if not provided)
+	static updateItem(
+		id: number,
+		title?: string,
+		imgUrl?: string,
+		tags?: string[],
+		status?: ValidStatus
+	): InventoryItem | null {
+		try {
+			// Get current item to preserve existing values
+			const currentItem = this.getItemById(id);
+			if (!currentItem) {
+				return null;
+			}
+
+			// Use provided values or keep current ones
+			const updatedTitle =
+				title !== undefined ? title : currentItem.title;
+			const updatedImgUrl =
+				imgUrl !== undefined ? imgUrl : currentItem.imgUrl;
+			const updatedTags = tags !== undefined ? tags : currentItem.tags;
+			const updatedStatus =
+				status !== undefined ? status : currentItem.status;
+			const updatedAt = new Date().toISOString();
+
+			const result = this.updateItemStatement.run(
+				updatedTitle,
+				updatedImgUrl,
+				JSON.stringify(updatedTags),
+				updatedStatus,
+				updatedAt,
+				id
+			);
+
+			if (result.changes > 0) {
+				return this.getItemById(id);
+			}
+
+			return null; // Item not found
+		} catch (error) {
+			console.error('Error updating inventory item:', error);
+			throw new Error('Database error while updating inventory item');
 		}
 	}
 
