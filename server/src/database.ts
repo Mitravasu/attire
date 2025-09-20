@@ -4,6 +4,7 @@ import fs from 'fs';
 import { migrateDatabase } from './migrate-database';
 import { migrateBackImgUrlOptional } from './migrate-back-img-optional';
 import { migrateAddColorType } from './migrate-add-color-type';
+import { migrateAddFavorites } from './migrate-add-favorites';
 
 // Database setup
 const dbDir = path.join(__dirname, '..', 'data');
@@ -49,6 +50,9 @@ export const initializeDatabase = (): void => {
 
 		// Add color and type columns
 		migrateAddColorType();
+
+		// Add isFavorite column
+		migrateAddFavorites();
 
 		console.log('Database tables initialized successfully');
 	} catch (error) {

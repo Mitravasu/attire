@@ -102,10 +102,10 @@ app.get('/', (req: Request, res: Response) => {
 // Get all inventory items (with optional filtering)
 app.get('/api/inventory', (req: Request, res: Response) => {
 	try {
-		const { status, color, type, tags } = req.query;
+		const { status, color, type, tags, isFavorite } = req.query;
 
 		// Check if any filters are applied
-		const hasFilters = status || color || type || tags;
+		const hasFilters = status || color || type || tags || isFavorite;
 
 		if (hasFilters) {
 			// Prepare filters object
@@ -131,6 +131,15 @@ app.get('/api/inventory', (req: Request, res: Response) => {
 					filters.tags = tags.filter(
 						(tag) => typeof tag === 'string'
 					);
+				}
+			}
+
+			if (isFavorite !== undefined) {
+				// Handle favorites filter - convert string to boolean
+				if (typeof isFavorite === 'string') {
+					filters.isFavorite = isFavorite.toLowerCase() === 'true';
+				} else if (typeof isFavorite === 'boolean') {
+					filters.isFavorite = isFavorite;
 				}
 			}
 
@@ -475,6 +484,47 @@ app.patch(
 	}
 );
 
+// Update inventory item favorite status
+app.patch(
+	'/api/inventory/:id/favorite',
+	(req: Request, res: Response): void => {
+		try {
+			const id: number = parseInt(req.params.id, 10);
+			const { isFavorite } = req.body;
+
+			if (typeof isFavorite !== 'boolean') {
+				res.status(400).json({
+					error: 'isFavorite is required and must be a boolean',
+				});
+				return;
+			}
+
+			const updatedItem: InventoryItem | null =
+				InventoryService.updateItemFavoriteStatus(id, isFavorite);
+
+			if (!updatedItem) {
+				res.status(404).json({
+					error: 'Inventory item not found',
+				});
+				return;
+			}
+
+			res.json({
+				message: 'Inventory item favorite status updated successfully',
+				item: updatedItem,
+			});
+		} catch (error) {
+			console.error(
+				'Error updating inventory item favorite status:',
+				error
+			);
+			res.status(500).json({
+				error: 'Internal server error while updating inventory item favorite status',
+			});
+		}
+	}
+);
+
 // Error handling middleware
 app.use(
 	(
@@ -507,6 +557,9 @@ app.listen(PORT, () => {
 	console.log(`  PUT    /api/inventory/:id - Update inventory item`);
 	console.log(`  DELETE /api/inventory/:id - Delete inventory item`);
 	console.log(`  PATCH  /api/inventory/:id/status - Update item status`);
+	console.log(
+		`  PATCH  /api/inventory/:id/favorite - Update item favorite status`
+	);
 });
 
 export default app;

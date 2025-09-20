@@ -11,6 +11,7 @@ interface InventoryPanelProps {
 		status: string;
 		color: string;
 		type: string;
+		isFavorite: string;
 	};
 }
 
@@ -39,6 +40,9 @@ export default function InventoryPanel({ filters }: InventoryPanelProps) {
 			}
 			if (filters.type && filters.type !== '') {
 				queryParams.append('type', filters.type);
+			}
+			if (filters.isFavorite && filters.isFavorite !== '') {
+				queryParams.append('isFavorite', filters.isFavorite);
 			}
 
 			const queryString = queryParams.toString();

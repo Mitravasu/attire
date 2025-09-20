@@ -6,7 +6,7 @@ import {
 	faSync,
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { InventoryItem } from 'src/types';
 
 interface InventoryCardProps {
@@ -24,8 +24,53 @@ export default function InventoryCard({
 		return <p className='text-accent text-sm'>{`#${tag.toUpperCase()}`}</p>;
 	});
 
-	const [isSaved, setIsSaved] = useState(false);
+	const [isSaved, setIsSaved] = useState(item.isFavorite);
 	const [showFrontImage, setShowFrontImage] = useState(true);
+	const [isUpdatingFavorite, setIsUpdatingFavorite] = useState(false);
+
+	// Sync with item prop when it changes (e.g., after refresh)
+	useEffect(() => {
+		setIsSaved(item.isFavorite);
+	}, [item.isFavorite]);
+
+	const handleToggleFavorite = async () => {
+		if (isUpdatingFavorite) return; // Prevent multiple simultaneous requests
+
+		setIsUpdatingFavorite(true);
+		const newIsSaved = !isSaved;
+
+		try {
+			// Optimistically update UI
+			setIsSaved(newIsSaved);
+
+			const response = await fetch(
+				`${import.meta.env.VITE_API_URL}/api/inventory/${
+					item.id
+				}/favorite`,
+				{
+					method: 'PATCH',
+					headers: {
+						'Content-Type': 'application/json',
+					},
+					body: JSON.stringify({
+						isFavorite: newIsSaved,
+					}),
+				}
+			);
+
+			if (!response.ok) {
+				throw new Error('Failed to update favorite status');
+			}
+
+			// The API response contains the updated item, but we're already optimistically updated
+		} catch (error) {
+			// Revert on error
+			setIsSaved(!newIsSaved);
+			console.error('Error updating favorite status:', error);
+		} finally {
+			setIsUpdatingFavorite(false);
+		}
+	};
 
 	return (
 		<div className='flex flex-col w-70 h-fit m-3'>
@@ -70,8 +115,13 @@ export default function InventoryCard({
 							<FontAwesomeIcon icon={faTrash} />
 						</button>
 						<button
-							className='cursor-pointer hover:text-accent'
-							onClick={() => setIsSaved(!isSaved)}
+							className={`cursor-pointer hover:text-accent transition-colors ${
+								isUpdatingFavorite
+									? 'opacity-50 cursor-not-allowed'
+									: ''
+							}`}
+							onClick={handleToggleFavorite}
+							disabled={isUpdatingFavorite}
 							title={
 								isSaved
 									? 'Remove from favorites'

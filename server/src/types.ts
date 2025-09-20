@@ -9,6 +9,7 @@ export interface InventoryItem {
 	status: 'dirty' | 'washed' | 'ironed';
 	color: string;
 	type: string;
+	isFavorite: boolean;
 	createdAt: string;
 	updatedAt?: string;
 }

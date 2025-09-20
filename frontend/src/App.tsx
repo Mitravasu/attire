@@ -10,12 +10,14 @@ function App() {
 		status: '',
 		color: '',
 		type: '',
+		isFavorite: '',
 	});
 
 	const handleFiltersChange = (newFilters: {
 		status: string;
 		color: string;
 		type: string;
+		isFavorite: string;
 	}) => {
 		setFilters(newFilters);
 	};

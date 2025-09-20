@@ -14,8 +14,8 @@ export class InventoryService {
 	private static get insertStatement() {
 		if (!this._insertStatement) {
 			this._insertStatement = db.prepare(`
-				INSERT INTO inventory (title, frontImgUrl, backImgUrl, tags, status, color, type, createdAt)
-				VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+				INSERT INTO inventory (title, frontImgUrl, backImgUrl, tags, status, color, type, isFavorite, createdAt)
+				VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
 			`);
 		}
 		return this._insertStatement;
@@ -24,18 +24,17 @@ export class InventoryService {
 	private static get selectAllStatement() {
 		if (!this._selectAllStatement) {
 			this._selectAllStatement = db.prepare(`
-				SELECT id, title, frontImgUrl, backImgUrl, tags, status, color, type, createdAt, updatedAt
+				SELECT id, title, frontImgUrl, backImgUrl, tags, status, color, type, isFavorite, createdAt, updatedAt
 				FROM inventory
 				ORDER BY createdAt DESC
 			`);
 		}
 		return this._selectAllStatement;
 	}
-
 	private static get selectByIdStatement() {
 		if (!this._selectByIdStatement) {
 			this._selectByIdStatement = db.prepare(`
-				SELECT id, title, frontImgUrl, backImgUrl, tags, status, color, type, createdAt, updatedAt
+				SELECT id, title, frontImgUrl, backImgUrl, tags, status, color, type, isFavorite, createdAt, updatedAt
 				FROM inventory
 				WHERE id = ?
 			`);
@@ -69,7 +68,7 @@ export class InventoryService {
 		if (!this._updateItemStatement) {
 			this._updateItemStatement = db.prepare(`
 				UPDATE inventory
-				SET title = ?, frontImgUrl = ?, backImgUrl = ?, tags = ?, status = ?, color = ?, type = ?, updatedAt = ?
+				SET title = ?, frontImgUrl = ?, backImgUrl = ?, tags = ?, status = ?, color = ?, type = ?, isFavorite = ?, updatedAt = ?
 				WHERE id = ?
 			`);
 		}
@@ -84,7 +83,8 @@ export class InventoryService {
 		tags: string[],
 		status: ValidStatus,
 		color: string,
-		type: string
+		type: string,
+		isFavorite: boolean = false
 	): InventoryItem {
 		try {
 			const createdAt = new Date().toISOString();
@@ -98,6 +98,7 @@ export class InventoryService {
 				status,
 				color,
 				type,
+				isFavorite ? 1 : 0,
 				createdAt
 			);
 
@@ -174,7 +175,8 @@ export class InventoryService {
 		tags?: string[],
 		status?: ValidStatus,
 		color?: string,
-		type?: string
+		type?: string,
+		isFavorite?: boolean
 	): InventoryItem | null {
 		try {
 			// Get current item to preserve existing values
@@ -198,6 +200,8 @@ export class InventoryService {
 			const updatedColor =
 				color !== undefined ? color : currentItem.color;
 			const updatedType = type !== undefined ? type : currentItem.type;
+			const updatedIsFavorite =
+				isFavorite !== undefined ? isFavorite : currentItem.isFavorite;
 			const updatedAt = new Date().toISOString();
 
 			const result = this.updateItemStatement.run(
@@ -208,6 +212,7 @@ export class InventoryService {
 				updatedStatus,
 				updatedColor,
 				updatedType,
+				updatedIsFavorite ? 1 : 0,
 				updatedAt,
 				id
 			);
@@ -245,6 +250,7 @@ export class InventoryService {
 			status: row.status as ValidStatus,
 			color: row.color || 'unknown',
 			type: row.type || 'other',
+			isFavorite: Boolean(row.isFavorite),
 			createdAt: row.createdAt,
 			updatedAt: row.updatedAt || undefined,
 		};
@@ -267,7 +273,7 @@ export class InventoryService {
 	static getItemsByStatus(status: ValidStatus): InventoryItem[] {
 		try {
 			const statement = db.prepare(`
-				SELECT id, title, frontImgUrl, backImgUrl, tags, status, color, type, createdAt, updatedAt
+				SELECT id, title, frontImgUrl, backImgUrl, tags, status, color, type, isFavorite, createdAt, updatedAt
 				FROM inventory
 				WHERE status = ?
 				ORDER BY createdAt DESC
@@ -282,16 +288,47 @@ export class InventoryService {
 		}
 	}
 
+	// Update inventory item favorite status
+	static updateItemFavoriteStatus(
+		id: number,
+		isFavorite: boolean
+	): InventoryItem | null {
+		try {
+			const updatedAt = new Date().toISOString();
+			const statement = db.prepare(`
+				UPDATE inventory
+				SET isFavorite = ?, updatedAt = ?
+				WHERE id = ?
+			`);
+			const result = statement.run(isFavorite ? 1 : 0, updatedAt, id);
+
+			if (result.changes > 0) {
+				return this.getItemById(id);
+			}
+
+			return null; // Item not found
+		} catch (error) {
+			console.error(
+				'Error updating inventory item favorite status:',
+				error
+			);
+			throw new Error(
+				'Database error while updating inventory item favorite status'
+			);
+		}
+	}
+
 	// Get filtered items based on multiple criteria
 	static getFilteredItems(filters: {
 		status?: ValidStatus;
 		color?: string;
 		type?: string;
 		tags?: string[];
+		isFavorite?: boolean;
 	}): InventoryItem[] {
 		try {
 			let query = `
-				SELECT id, title, frontImgUrl, backImgUrl, tags, status, color, type, createdAt, updatedAt
+				SELECT id, title, frontImgUrl, backImgUrl, tags, status, color, type, isFavorite, createdAt, updatedAt
 				FROM inventory
 				WHERE 1=1
 			`;
@@ -324,6 +361,12 @@ export class InventoryService {
 				filters.tags.forEach((tag) => {
 					params.push(`%"${tag}"%`);
 				});
+			}
+
+			// Add favorites filter
+			if (filters.isFavorite !== undefined) {
+				query += ` AND isFavorite = ?`;
+				params.push(filters.isFavorite ? 1 : 0);
 			}
 
 			query += ` ORDER BY createdAt DESC`;

@@ -14,6 +14,7 @@ interface FilterPanelProps {
 		status: string;
 		color: string;
 		type: string;
+		isFavorite: string;
 	}) => void;
 }
 
@@ -27,6 +28,7 @@ export default function FilterPanel({ onFiltersChange }: FilterPanelProps) {
 		status: '',
 		color: '',
 		type: '',
+		isFavorite: '',
 	});
 
 	// Fetch filter values from API
@@ -62,6 +64,7 @@ export default function FilterPanel({ onFiltersChange }: FilterPanelProps) {
 			status: '',
 			color: '',
 			type: '',
+			isFavorite: '',
 		};
 		setSelectedFilters(emptyFilters);
 		onFiltersChange(emptyFilters);
@@ -101,6 +104,30 @@ export default function FilterPanel({ onFiltersChange }: FilterPanelProps) {
 				onChange={(e) => handleFilterChange('type', e.target.value)}
 				options={['', ...filterValues.types]}
 			/>
+
+			<div className='flex flex-col'>
+				<label htmlFor='isFavorite' className='font-bold'>
+					Favorites
+				</label>
+				<select
+					id='isFavorite'
+					name='isFavorite'
+					value={selectedFilters.isFavorite}
+					onChange={(e) =>
+						handleFilterChange('isFavorite', e.target.value)
+					}
+					className='border-2 border-white p-2 bg-black/20 rounded-md'>
+					<option value='' className='text-black'>
+						All Items
+					</option>
+					<option value='true' className='text-black'>
+						Favorites Only
+					</option>
+					<option value='false' className='text-black'>
+						Non-Favorites Only
+					</option>
+				</select>
+			</div>
 		</div>
 	);
 }
