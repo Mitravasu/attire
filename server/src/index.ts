@@ -12,6 +12,8 @@ import {
 	MulterError,
 	ValidStatus,
 } from './types';
+import { initializeDatabase } from './database';
+import { InventoryService } from './inventoryService';
 
 const app: Application = express();
 const PORT: number = parseInt(process.env.PORT || '3001', 10);
@@ -76,9 +78,8 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // Serve uploaded files statically
 app.use('/uploads', express.static(uploadsDir));
 
-// In-memory storage for inventory items (in a real app, you'd use a database)
-let inventory: InventoryItem[] = [];
-let nextId: number = 1;
+// Initialize database
+initializeDatabase();
 
 // Validation function for status
 const isValidStatus = (status: string): status is ValidStatus => {
@@ -93,7 +94,15 @@ app.get('/', (req: Request, res: Response) => {
 
 // Get all inventory items
 app.get('/api/inventory', (req: Request, res: Response) => {
-	res.json(inventory);
+	try {
+		const items = InventoryService.getAllItems();
+		res.json(items);
+	} catch (error) {
+		console.error('Error fetching inventory items:', error);
+		res.status(500).json({
+			error: 'Internal server error while fetching inventory items',
+		});
+	}
 });
 
 // Add new inventory item
@@ -159,18 +168,13 @@ app.post(
 			// Create image URL relative to server
 			const imgUrl: string = `/uploads/${req.file.filename}`;
 
-			// Create new inventory item
-			const newItem: InventoryItem = {
-				id: nextId++,
-				title: title.trim(),
-				imgUrl: imgUrl,
-				tags: parsedTags,
-				status: status.toLowerCase() as ValidStatus,
-				createdAt: new Date().toISOString(),
-			};
-
-			// Add to inventory
-			inventory.push(newItem);
+			// Create new inventory item using database service
+			const newItem: InventoryItem = InventoryService.createItem(
+				title.trim(),
+				imgUrl,
+				parsedTags,
+				status.toLowerCase() as ValidStatus
+			);
 
 			res.status(201).json({
 				message: 'Inventory item added successfully',
@@ -189,23 +193,30 @@ app.post(
 app.delete('/api/inventory/:id', (req: DeleteRequest, res: Response): void => {
 	try {
 		const id: number = parseInt(req.params.id, 10);
-		const itemIndex: number = inventory.findIndex(
-			(item: InventoryItem) => item.id === id
-		);
 
-		if (itemIndex === -1) {
+		// Get the item before deleting to return it in response
+		const itemToDelete: InventoryItem | null =
+			InventoryService.getItemById(id);
+
+		if (!itemToDelete) {
 			res.status(404).json({
 				error: 'Inventory item not found',
 			});
 			return;
 		}
 
-		const deletedItem: InventoryItem = inventory.splice(itemIndex, 1)[0];
+		const deleted: boolean = InventoryService.deleteItem(id);
 
-		res.json({
-			message: 'Inventory item deleted successfully',
-			item: deletedItem,
-		});
+		if (deleted) {
+			res.json({
+				message: 'Inventory item deleted successfully',
+				item: itemToDelete,
+			});
+		} else {
+			res.status(404).json({
+				error: 'Inventory item not found',
+			});
+		}
 	} catch (error) {
 		console.error('Error deleting inventory item:', error);
 		res.status(500).json({
@@ -229,23 +240,22 @@ app.patch(
 				return;
 			}
 
-			const item: InventoryItem | undefined = inventory.find(
-				(item: InventoryItem) => item.id === id
-			);
+			const updatedItem: InventoryItem | null =
+				InventoryService.updateItemStatus(
+					id,
+					status.toLowerCase() as ValidStatus
+				);
 
-			if (!item) {
+			if (!updatedItem) {
 				res.status(404).json({
 					error: 'Inventory item not found',
 				});
 				return;
 			}
 
-			item.status = status.toLowerCase() as ValidStatus;
-			item.updatedAt = new Date().toISOString();
-
 			res.json({
 				message: 'Inventory item status updated successfully',
-				item: item,
+				item: updatedItem,
 			});
 		} catch (error) {
 			console.error('Error updating inventory item status:', error);
