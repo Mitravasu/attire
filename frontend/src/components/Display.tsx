@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import ItemCard from './ItemCard';
 
 export type ClothingItem = {
@@ -7,80 +8,21 @@ export type ClothingItem = {
 };
 
 export default function Display() {
-	const clothingItems: ClothingItem[] = [
-		{
-			imgPath: '/jacket.png',
-			title: 'Cozy Hoodie',
-			tags: ['hoodie', 'casual', 'winter', 'comfortable'],
-		},
-		{
-			imgPath: '/jacket.png',
-			title: 'Basic T-Shirt',
-			tags: ['t-shirt', 'casual', 'summer', 'comfortable'],
-		},
-		{
-			imgPath: '/jacket.png',
-			title: 'Leather Jacket',
-			tags: ['jacket', 'stylish', 'night-out', 'fall'],
-		},
-		{
-			imgPath: '/jacket.png',
-			title: 'Evening Dress',
-			tags: ['dress', 'formal', 'night-out', 'elegant'],
-		},
-		{
-			imgPath: '/jacket.png',
-			title: 'Blue Jeans',
-			tags: ['jeans', 'casual', 'comfortable', 'everyday'],
-		},
-		{
-			imgPath: '/jacket.png',
-			title: 'Running Sneakers',
-			tags: ['sneakers', 'sport', 'comfortable', 'active'],
-		},
-		{
-			imgPath: '/jacket.png',
-			title: 'Knitted Sweater',
-			tags: ['sweater', 'winter', 'comfortable', 'cozy'],
-		},
-		{
-			imgPath: '/jacket.png',
-			title: 'Floral Skirt',
-			tags: ['skirt', 'summer', 'casual', 'feminine'],
-		},
-		{
-			imgPath: '/jacket.png',
-			title: 'Silk Blouse',
-			tags: ['blouse', 'formal', 'elegant', 'work'],
-		},
-		{
-			imgPath: '/jacket.png',
-			title: 'Cargo Shorts',
-			tags: ['shorts', 'summer', 'casual', 'comfortable'],
-		},
-		{
-			imgPath: '/jacket.png',
-			title: 'Knitted Sweater',
-			tags: ['sweater', 'winter', 'comfortable', 'cozy'],
-		},
-		{
-			imgPath: '/jacket.png',
-			title: 'Floral Skirt',
-			tags: ['skirt', 'summer', 'casual', 'feminine'],
-		},
-		{
-			imgPath: '/jacket.png',
-			title: 'Silk Blouse',
-			tags: ['blouse', 'formal', 'elegant', 'work'],
-		},
-		{
-			imgPath: '/jacket.png',
-			title: 'Cargo Shorts',
-			tags: ['shorts', 'summer', 'casual', 'comfortable'],
-		},
-	];
+	const [items, setItems] = useState<ClothingItem[]>([]);
 
-	const itemCards = clothingItems.map((item) => {
+	const fetchItems = async () => {
+		const response = await fetch(
+			`${import.meta.env.VITE_API_URL}/inventory`,
+			{ method: 'GET' }
+		);
+		const data: ClothingItem[] = await response.json();
+
+		setItems(data);
+	};
+
+	fetchItems();
+
+	const itemCards = items.map((item) => {
 		return (
 			<ItemCard
 				imgPath={item.imgPath}
