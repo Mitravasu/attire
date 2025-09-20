@@ -118,7 +118,7 @@ app.post(
 	uploadMultiple,
 	(req: InventoryRequest, res: Response): void => {
 		try {
-			const { title, tags, status } = req.body;
+			const { title, tags, status, color, type } = req.body;
 			const files = req.files as {
 				[fieldname: string]: Express.Multer.File[];
 			};
@@ -175,6 +175,20 @@ app.post(
 				return;
 			}
 
+			if (!color || typeof color !== 'string' || color.trim() === '') {
+				res.status(400).json({
+					error: 'Color is required and must be a non-empty string',
+				});
+				return;
+			}
+
+			if (!type || typeof type !== 'string' || type.trim() === '') {
+				res.status(400).json({
+					error: 'Type is required and must be a non-empty string',
+				});
+				return;
+			}
+
 			// Create image URLs relative to server
 			const frontImgUrl: string = `/uploads/${files.frontImage[0].filename}`;
 			const backImgUrl: string | null = files.backImage
@@ -187,7 +201,9 @@ app.post(
 				frontImgUrl,
 				backImgUrl,
 				parsedTags,
-				status.toLowerCase() as ValidStatus
+				status.toLowerCase() as ValidStatus,
+				color.trim(),
+				type.trim()
 			);
 
 			res.status(201).json({
@@ -210,7 +226,7 @@ app.put(
 	(req: EditInventoryRequest, res: Response): void => {
 		try {
 			const id: number = parseInt(req.params.id, 10);
-			const { title, tags, status } = req.body;
+			const { title, tags, status, color, type } = req.body;
 			const files = req.files as {
 				[fieldname: string]: Express.Multer.File[];
 			};
@@ -267,6 +283,28 @@ app.put(
 				return;
 			}
 
+			// Validate color if provided
+			if (
+				color !== undefined &&
+				(typeof color !== 'string' || color.trim() === '')
+			) {
+				res.status(400).json({
+					error: 'Color must be a non-empty string if provided',
+				});
+				return;
+			}
+
+			// Validate type if provided
+			if (
+				type !== undefined &&
+				(typeof type !== 'string' || type.trim() === '')
+			) {
+				res.status(400).json({
+					error: 'Type must be a non-empty string if provided',
+				});
+				return;
+			}
+
 			// Handle image updates
 			let frontImgUrl: string | undefined;
 			let backImgUrl: string | null | undefined;
@@ -285,7 +323,9 @@ app.put(
 					frontImgUrl,
 					backImgUrl,
 					parsedTags,
-					status?.toLowerCase() as ValidStatus
+					status?.toLowerCase() as ValidStatus,
+					color?.trim(),
+					type?.trim()
 				);
 
 			if (!updatedItem) {

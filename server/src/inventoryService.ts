@@ -14,8 +14,8 @@ export class InventoryService {
 	private static get insertStatement() {
 		if (!this._insertStatement) {
 			this._insertStatement = db.prepare(`
-				INSERT INTO inventory (title, frontImgUrl, backImgUrl, tags, status, createdAt)
-				VALUES (?, ?, ?, ?, ?, ?)
+				INSERT INTO inventory (title, frontImgUrl, backImgUrl, tags, status, color, type, createdAt)
+				VALUES (?, ?, ?, ?, ?, ?, ?, ?)
 			`);
 		}
 		return this._insertStatement;
@@ -24,7 +24,7 @@ export class InventoryService {
 	private static get selectAllStatement() {
 		if (!this._selectAllStatement) {
 			this._selectAllStatement = db.prepare(`
-				SELECT id, title, frontImgUrl, backImgUrl, tags, status, createdAt, updatedAt
+				SELECT id, title, frontImgUrl, backImgUrl, tags, status, color, type, createdAt, updatedAt
 				FROM inventory
 				ORDER BY createdAt DESC
 			`);
@@ -35,7 +35,7 @@ export class InventoryService {
 	private static get selectByIdStatement() {
 		if (!this._selectByIdStatement) {
 			this._selectByIdStatement = db.prepare(`
-				SELECT id, title, frontImgUrl, backImgUrl, tags, status, createdAt, updatedAt
+				SELECT id, title, frontImgUrl, backImgUrl, tags, status, color, type, createdAt, updatedAt
 				FROM inventory
 				WHERE id = ?
 			`);
@@ -69,7 +69,7 @@ export class InventoryService {
 		if (!this._updateItemStatement) {
 			this._updateItemStatement = db.prepare(`
 				UPDATE inventory
-				SET title = ?, frontImgUrl = ?, backImgUrl = ?, tags = ?, status = ?, updatedAt = ?
+				SET title = ?, frontImgUrl = ?, backImgUrl = ?, tags = ?, status = ?, color = ?, type = ?, updatedAt = ?
 				WHERE id = ?
 			`);
 		}
@@ -82,7 +82,9 @@ export class InventoryService {
 		frontImgUrl: string,
 		backImgUrl: string | null,
 		tags: string[],
-		status: ValidStatus
+		status: ValidStatus,
+		color: string,
+		type: string
 	): InventoryItem {
 		try {
 			const createdAt = new Date().toISOString();
@@ -94,6 +96,8 @@ export class InventoryService {
 				backImgUrl,
 				tagsJson,
 				status,
+				color,
+				type,
 				createdAt
 			);
 
@@ -168,7 +172,9 @@ export class InventoryService {
 		frontImgUrl?: string,
 		backImgUrl?: string | null,
 		tags?: string[],
-		status?: ValidStatus
+		status?: ValidStatus,
+		color?: string,
+		type?: string
 	): InventoryItem | null {
 		try {
 			// Get current item to preserve existing values
@@ -189,6 +195,9 @@ export class InventoryService {
 			const updatedTags = tags !== undefined ? tags : currentItem.tags;
 			const updatedStatus =
 				status !== undefined ? status : currentItem.status;
+			const updatedColor =
+				color !== undefined ? color : currentItem.color;
+			const updatedType = type !== undefined ? type : currentItem.type;
 			const updatedAt = new Date().toISOString();
 
 			const result = this.updateItemStatement.run(
@@ -197,6 +206,8 @@ export class InventoryService {
 				updatedBackImgUrl,
 				JSON.stringify(updatedTags),
 				updatedStatus,
+				updatedColor,
+				updatedType,
 				updatedAt,
 				id
 			);
@@ -232,6 +243,8 @@ export class InventoryService {
 			backImgUrl: row.backImgUrl || undefined, // Handle null/undefined back images
 			tags: JSON.parse(row.tags),
 			status: row.status as ValidStatus,
+			color: row.color || 'unknown',
+			type: row.type || 'other',
 			createdAt: row.createdAt,
 			updatedAt: row.updatedAt || undefined,
 		};
@@ -254,7 +267,7 @@ export class InventoryService {
 	static getItemsByStatus(status: ValidStatus): InventoryItem[] {
 		try {
 			const statement = db.prepare(`
-				SELECT id, title, frontImgUrl, backImgUrl, tags, status, createdAt, updatedAt
+				SELECT id, title, frontImgUrl, backImgUrl, tags, status, color, type, createdAt, updatedAt
 				FROM inventory
 				WHERE status = ?
 				ORDER BY createdAt DESC

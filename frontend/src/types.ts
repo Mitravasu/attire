@@ -5,6 +5,8 @@ export type InventoryItem = {
 	frontImgUrl: string;
 	backImgUrl?: string; // Optional back image
 	status: 'dirty' | 'washed' | 'ironed';
+	color: string;
+	type: string;
 	createdAt: string;
 	updatedAt?: string;
 };

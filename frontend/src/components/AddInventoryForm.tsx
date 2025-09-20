@@ -5,6 +5,7 @@ import TextInput from './TextInput';
 import Dropdown from './Dropdown';
 import Button from './Button';
 import FileInput from './FileInput';
+import { COLOR_OPTIONS, TYPE_OPTIONS } from '../constants';
 
 interface AddInventoryFormProps {
 	isVisible: boolean;
@@ -19,6 +20,8 @@ export default function AddInventoryForm({
 		title: '',
 		tags: '',
 		status: 'dirty' as 'dirty' | 'washed' | 'ironed',
+		color: COLOR_OPTIONS[0],
+		type: TYPE_OPTIONS[0],
 	});
 	const [selectedFrontFile, setSelectedFrontFile] = useState<File | null>(
 		null
@@ -103,6 +106,8 @@ export default function AddInventoryForm({
 			formDataToSend.append('title', formData.title.trim());
 			formDataToSend.append('tags', formData.tags.trim());
 			formDataToSend.append('status', formData.status);
+			formDataToSend.append('color', formData.color);
+			formDataToSend.append('type', formData.type);
 			formDataToSend.append('frontImage', selectedFrontFile);
 			if (selectedBackFile) {
 				formDataToSend.append('backImage', selectedBackFile);
@@ -130,6 +135,8 @@ export default function AddInventoryForm({
 				title: '',
 				tags: '',
 				status: 'dirty',
+				color: COLOR_OPTIONS[0],
+				type: TYPE_OPTIONS[0],
 			});
 			setSelectedFrontFile(null);
 			setSelectedBackFile(null);
@@ -205,6 +212,22 @@ export default function AddInventoryForm({
 					value={formData.tags}
 					handleInputChange={handleInputChange}
 					placeholder='e.g., casual, shirt, blue'
+					required
+				/>
+				<Dropdown
+					id='color'
+					label='Color *'
+					value={formData.color}
+					onChange={handleInputChange}
+					options={[...COLOR_OPTIONS]}
+					required
+				/>
+				<Dropdown
+					id='type'
+					label='Type *'
+					value={formData.type}
+					onChange={handleInputChange}
+					options={[...TYPE_OPTIONS]}
 					required
 				/>
 				<Dropdown

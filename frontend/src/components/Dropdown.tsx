@@ -25,10 +25,12 @@ export default function Dropdown({
 				name={id}
 				value={value}
 				onChange={onChange}
-				className='border-2 border-white p-2 bg-black rounded-md'
+				className='border-2 border-white p-2 bg-black/20 rounded-md'
 				required={required}>
-				{options.map((value) => (
-					<option className='text-black'>{value}</option>
+				{options.map((option) => (
+					<option key={option} value={option} className='text-black'>
+						{option}
+					</option>
 				))}
 			</select>
 		</div>

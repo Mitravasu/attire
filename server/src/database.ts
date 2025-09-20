@@ -3,6 +3,7 @@ import path from 'path';
 import fs from 'fs';
 import { migrateDatabase } from './migrate-database';
 import { migrateBackImgUrlOptional } from './migrate-back-img-optional';
+import { migrateAddColorType } from './migrate-add-color-type';
 
 // Database setup
 const dbDir = path.join(__dirname, '..', 'data');
@@ -45,6 +46,9 @@ export const initializeDatabase = (): void => {
 
 		// Make backImgUrl optional
 		migrateBackImgUrlOptional();
+
+		// Add color and type columns
+		migrateAddColorType();
 
 		console.log('Database tables initialized successfully');
 	} catch (error) {

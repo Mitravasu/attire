@@ -7,6 +7,8 @@ export interface InventoryItem {
 	backImgUrl?: string; // Optional back image
 	tags: string[];
 	status: 'dirty' | 'washed' | 'ironed';
+	color: string;
+	type: string;
 	createdAt: string;
 	updatedAt?: string;
 }
@@ -16,6 +18,8 @@ export interface InventoryRequest extends Request {
 		title: string;
 		tags: string | string[];
 		status: string;
+		color: string;
+		type: string;
 	};
 }
 
@@ -36,6 +40,8 @@ export interface EditInventoryRequest extends Request {
 		title?: string;
 		tags?: string | string[];
 		status?: string;
+		color?: string;
+		type?: string;
 	};
 }
 

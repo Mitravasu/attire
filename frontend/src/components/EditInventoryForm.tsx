@@ -6,6 +6,7 @@ import Dropdown from './Dropdown';
 import Button from './Button';
 import FileInput from './FileInput';
 import { InventoryItem } from 'src/types';
+import { COLOR_OPTIONS, TYPE_OPTIONS } from '../constants';
 
 interface EditInventoryFormProps {
 	isVisible: boolean;
@@ -24,6 +25,8 @@ export default function EditInventoryForm({
 		title: '',
 		tags: '',
 		status: 'dirty' as 'dirty' | 'washed' | 'ironed',
+		color: COLOR_OPTIONS[0] as string,
+		type: TYPE_OPTIONS[0] as string,
 	});
 	const [selectedFrontFile, setSelectedFrontFile] = useState<File | null>(
 		null
@@ -40,6 +43,8 @@ export default function EditInventoryForm({
 				title: item.title,
 				tags: item.tags.join(', '),
 				status: item.status,
+				color: item.color,
+				type: item.type,
 			});
 		}
 	}, [item]);
@@ -117,6 +122,8 @@ export default function EditInventoryForm({
 			formDataToSend.append('title', formData.title.trim());
 			formDataToSend.append('tags', formData.tags.trim());
 			formDataToSend.append('status', formData.status);
+			formDataToSend.append('color', formData.color);
+			formDataToSend.append('type', formData.type);
 
 			// Only append images if new ones were selected
 			if (selectedFrontFile) {
@@ -163,12 +170,8 @@ export default function EditInventoryForm({
 			if (backFileInput) {
 				backFileInput.value = '';
 			}
-
-			// Close modal after short delay
-			setTimeout(() => {
-				setVisibility(false);
-				setSuccess(null);
-			}, 1500);
+			setVisibility(false);
+			setSuccess(null);
 		} catch (err) {
 			setError(err instanceof Error ? err.message : 'An error occurred');
 		} finally {
@@ -291,6 +294,24 @@ export default function EditInventoryForm({
 					value={formData.tags}
 					handleInputChange={handleInputChange}
 					placeholder='e.g., casual, shirt, blue'
+					required
+				/>
+
+				<Dropdown
+					id='color'
+					label='Color *'
+					value={formData.color}
+					onChange={handleInputChange}
+					options={[...COLOR_OPTIONS]}
+					required
+				/>
+
+				<Dropdown
+					id='type'
+					label='Type *'
+					value={formData.type}
+					onChange={handleInputChange}
+					options={[...TYPE_OPTIONS]}
 					required
 				/>
 

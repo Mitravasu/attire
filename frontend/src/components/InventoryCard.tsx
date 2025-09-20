@@ -82,6 +82,8 @@ export default function InventoryCard({
 					</div>
 				</div>
 				<div className='flex flex-wrap space-x-2 pt-1'>
+					<p className='text-accent text-sm'>{`#${item.color.toUpperCase()}`}</p>
+					<p className='text-accent text-sm'>{`#${item.type.toUpperCase()}`}</p>
 					{tagsDisplay}
 				</div>
 				<div className='pt-1'>

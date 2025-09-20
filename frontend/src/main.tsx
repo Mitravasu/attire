@@ -22,7 +22,7 @@ function Layout({ children }: { children: React.ReactNode }) {
 // Update your app rendering to use the Layout
 createRoot(document.getElementById('root')!).render(
 	<StrictMode>
-		<div className='font-display bg-gray-600 text-white'>
+		<div className='font-display bg-gray-800 text-white'>
 			<Layout>
 				<App />
 			</Layout>
