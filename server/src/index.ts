@@ -99,15 +99,65 @@ app.get('/', (req: Request, res: Response) => {
 	res.json({ message: 'Attire Inventory Server is running!' });
 });
 
-// Get all inventory items
+// Get all inventory items (with optional filtering)
 app.get('/api/inventory', (req: Request, res: Response) => {
 	try {
-		const items = InventoryService.getAllItems();
-		res.json(items);
+		const { status, color, type, tags } = req.query;
+
+		// Check if any filters are applied
+		const hasFilters = status || color || type || tags;
+
+		if (hasFilters) {
+			// Prepare filters object
+			const filters: any = {};
+
+			if (status && isValidStatus(status as string)) {
+				filters.status = status as ValidStatus;
+			}
+
+			if (color && typeof color === 'string') {
+				filters.color = color;
+			}
+
+			if (type && typeof type === 'string') {
+				filters.type = type;
+			}
+
+			if (tags) {
+				// Handle tags as either a single tag or array of tags
+				if (typeof tags === 'string') {
+					filters.tags = [tags];
+				} else if (Array.isArray(tags)) {
+					filters.tags = tags.filter(
+						(tag) => typeof tag === 'string'
+					);
+				}
+			}
+
+			const items = InventoryService.getFilteredItems(filters);
+			res.json(items);
+		} else {
+			// No filters applied, get all items
+			const items = InventoryService.getAllItems();
+			res.json(items);
+		}
 	} catch (error) {
 		console.error('Error fetching inventory items:', error);
 		res.status(500).json({
 			error: 'Internal server error while fetching inventory items',
+		});
+	}
+});
+
+// Get unique filter values for dropdowns
+app.get('/api/inventory/filters', (req: Request, res: Response) => {
+	try {
+		const filterValues = InventoryService.getUniqueFilterValues();
+		res.json(filterValues);
+	} catch (error) {
+		console.error('Error fetching filter values:', error);
+		res.status(500).json({
+			error: 'Internal server error while fetching filter values',
 		});
 	}
 });

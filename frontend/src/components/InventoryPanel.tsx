@@ -4,9 +4,17 @@ import { InventoryItem } from 'src/types';
 import InventoryCard from './InventoryCard';
 import EditInventoryForm from './EditInventoryForm';
 import DeleteConfirmationModal from './DeleteConfirmationModal';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
-export default function InventoryPanel() {
+interface InventoryPanelProps {
+	filters: {
+		status: string;
+		color: string;
+		type: string;
+	};
+}
+
+export default function InventoryPanel({ filters }: InventoryPanelProps) {
 	const [items, setItems] = useState<InventoryItem[]>([]);
 	const [isEditFormVisible, setIsEditFormVisible] = useState(false);
 	const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
@@ -16,13 +24,29 @@ export default function InventoryPanel() {
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 
-	const fetchItems = async () => {
+	const fetchItems = useCallback(async () => {
 		try {
 			setIsLoading(true);
 			setError(null);
-			const response = await fetch(
-				`${import.meta.env.VITE_API_URL}/api/inventory`
-			);
+
+			// Build query parameters based on filters
+			const queryParams = new URLSearchParams();
+			if (filters.status && filters.status !== '') {
+				queryParams.append('status', filters.status);
+			}
+			if (filters.color && filters.color !== '') {
+				queryParams.append('color', filters.color);
+			}
+			if (filters.type && filters.type !== '') {
+				queryParams.append('type', filters.type);
+			}
+
+			const queryString = queryParams.toString();
+			const url = `${import.meta.env.VITE_API_URL}/api/inventory${
+				queryString ? `?${queryString}` : ''
+			}`;
+
+			const response = await fetch(url);
 
 			if (!response.ok) {
 				throw new Error('Failed to fetch inventory items');
@@ -35,11 +59,12 @@ export default function InventoryPanel() {
 		} finally {
 			setIsLoading(false);
 		}
-	};
+	}, [filters]);
 
+	// Fetch items on component mount and when filters change
 	useEffect(() => {
 		fetchItems();
-	}, []);
+	}, [fetchItems]);
 
 	const handleEditItem = (item: InventoryItem) => {
 		setSelectedItem(item);

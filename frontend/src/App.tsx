@@ -6,6 +6,19 @@ import { useState } from 'react';
 
 function App() {
 	const [isFormVisible, setIsFormVisible] = useState(false);
+	const [filters, setFilters] = useState({
+		status: '',
+		color: '',
+		type: '',
+	});
+
+	const handleFiltersChange = (newFilters: {
+		status: string;
+		color: string;
+		type: string;
+	}) => {
+		setFilters(newFilters);
+	};
 
 	return (
 		<div className='flex space-x-4 h-full w-full'>
@@ -13,13 +26,13 @@ function App() {
 				isVisible={isFormVisible}
 				setVisibility={setIsFormVisible}
 			/>
-			<FilterPanel />
+			<FilterPanel onFiltersChange={handleFiltersChange} />
 			<div className='flex flex-col h-full w-full space-y-2'>
 				<Button
 					onClick={() => setIsFormVisible(true)}
 					label='Add Item'
 				/>
-				<InventoryPanel />
+				<InventoryPanel filters={filters} />
 			</div>
 		</div>
 	);

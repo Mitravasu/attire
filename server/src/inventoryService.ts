@@ -281,4 +281,99 @@ export class InventoryService {
 			);
 		}
 	}
+
+	// Get filtered items based on multiple criteria
+	static getFilteredItems(filters: {
+		status?: ValidStatus;
+		color?: string;
+		type?: string;
+		tags?: string[];
+	}): InventoryItem[] {
+		try {
+			let query = `
+				SELECT id, title, frontImgUrl, backImgUrl, tags, status, color, type, createdAt, updatedAt
+				FROM inventory
+				WHERE 1=1
+			`;
+			const params: any[] = [];
+
+			// Add status filter
+			if (filters.status) {
+				query += ` AND status = ?`;
+				params.push(filters.status);
+			}
+
+			// Add color filter
+			if (filters.color) {
+				query += ` AND LOWER(color) = LOWER(?)`;
+				params.push(filters.color);
+			}
+
+			// Add type filter
+			if (filters.type) {
+				query += ` AND LOWER(type) = LOWER(?)`;
+				params.push(filters.type);
+			}
+
+			// Add tags filter (contains any of the specified tags)
+			if (filters.tags && filters.tags.length > 0) {
+				const tagConditions = filters.tags
+					.map(() => `JSON_EXTRACT(tags, '$') LIKE ?`)
+					.join(' OR ');
+				query += ` AND (${tagConditions})`;
+				filters.tags.forEach((tag) => {
+					params.push(`%"${tag}"%`);
+				});
+			}
+
+			query += ` ORDER BY createdAt DESC`;
+
+			const statement = db.prepare(query);
+			const rows = statement.all(...params) as any[];
+			return rows.map(this.mapRowToInventoryItem);
+		} catch (error) {
+			console.error('Error fetching filtered inventory items:', error);
+			throw new Error(
+				'Database error while fetching filtered inventory items'
+			);
+		}
+	}
+
+	// Get unique values for filter dropdowns
+	static getUniqueFilterValues(): {
+		colors: string[];
+		types: string[];
+		statuses: ValidStatus[];
+	} {
+		try {
+			const colorsResult = db
+				.prepare(
+					`
+				SELECT DISTINCT color FROM inventory WHERE color IS NOT NULL AND color != ''
+				ORDER BY color
+			`
+				)
+				.all() as any[];
+
+			const typesResult = db
+				.prepare(
+					`
+				SELECT DISTINCT type FROM inventory WHERE type IS NOT NULL AND type != ''
+				ORDER BY type
+			`
+				)
+				.all() as any[];
+
+			const colors = colorsResult.map((row) => row.color);
+			const types = typesResult.map((row) => row.type);
+			const statuses: ValidStatus[] = ['dirty', 'washed', 'ironed'];
+
+			return { colors, types, statuses };
+		} catch (error) {
+			console.error('Error fetching unique filter values:', error);
+			throw new Error(
+				'Database error while fetching unique filter values'
+			);
+		}
+	}
 }
