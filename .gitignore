@@ -25,3 +25,4 @@ dist-ssr
 attire.db
 attire.db-journal
 frontend/.env
+server/uploads

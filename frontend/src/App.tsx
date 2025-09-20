@@ -1,11 +1,26 @@
-import Display from '@components/Display';
-import FilterBar from '@components/FilterBar';
+import AddInventoryForm from '@components/AddInventoryForm';
+import Button from '@components/Button';
+import FilterPanel from '@components/FilterPanel';
+import InventoryPanel from '@components/InventoryPanel';
+import { useState } from 'react';
 
 function App() {
+	const [isFormVisible, setIsFormVisible] = useState(false);
+
 	return (
-		<div className='flex h-screen font-display p-4 space-x-4 bg-primary text-secondary'>
-			<FilterBar />
-			<Display />
+		<div className='flex space-x-4 h-full w-full'>
+			<AddInventoryForm
+				isVisible={isFormVisible}
+				setVisibility={setIsFormVisible}
+			/>
+			<FilterPanel />
+			<div className='flex flex-col h-full w-full space-y-2'>
+				<Button
+					onClick={() => setIsFormVisible(true)}
+					label='Add Item'
+				/>
+				<InventoryPanel />
+			</div>
 		</div>
 	);
 }

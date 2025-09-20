@@ -2,15 +2,10 @@ import { faBookmark as unsaved } from '@fortawesome/free-regular-svg-icons';
 import { faBookmark as saved } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useState } from 'react';
+import { InventoryItem } from 'src/types';
 
-export type ItemCardProps = {
-	imgPath: string;
-	title: string;
-	tags: string[];
-};
-
-export default function ItemCard({ imgPath, title, tags }: ItemCardProps) {
-	const tagsDisplay = tags.map((tag) => {
+export default function InventoryCard({ item }: { item: InventoryItem }) {
+	const tagsDisplay = item.tags.map((tag) => {
 		return <p className='text-accent text-sm'>{`#${tag.toUpperCase()}`}</p>;
 	});
 
@@ -19,11 +14,11 @@ export default function ItemCard({ imgPath, title, tags }: ItemCardProps) {
 	return (
 		<div className='flex flex-col w-70 h-fit m-3'>
 			<img
-				src={imgPath}
+				src={item.imgUrl}
 				className='w-full border-secondary bg-primary h-80 overflow-hidden'></img>
 			<div className='flex flex-col w-full h-30 bg-primary pt-1'>
 				<div className='flex w-full justify-between'>
-					<p className='text-md'>{title.toUpperCase()}</p>
+					<p className='text-md'>{item.title.toUpperCase()}</p>
 					<button
 						className='cursor-pointer hover:text-accent'
 						onClick={() => setIsSaved(!isSaved)}>
