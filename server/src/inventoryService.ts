@@ -129,6 +129,52 @@ export class InventoryService {
 		}
 	}
 
+	// Get paginated inventory items
+	static getPaginatedItems(
+		page: number = 1,
+		limit: number = 20
+	): {
+		items: InventoryItem[];
+		totalItems: number;
+		totalPages: number;
+		currentPage: number;
+		hasNext: boolean;
+		hasPrev: boolean;
+	} {
+		try {
+			const offset = (page - 1) * limit;
+
+			// Get total count
+			const totalItems = this.getItemCount();
+			const totalPages = Math.ceil(totalItems / limit);
+
+			// Get paginated items
+			const statement = db.prepare(`
+				SELECT id, title, frontImgUrl, backImgUrl, tags, status, color, type, isFavorite, createdAt, updatedAt
+				FROM inventory
+				ORDER BY createdAt DESC
+				LIMIT ? OFFSET ?
+			`);
+
+			const rows = statement.all(limit, offset) as any[];
+			const items = rows.map(this.mapRowToInventoryItem);
+
+			return {
+				items,
+				totalItems,
+				totalPages,
+				currentPage: page,
+				hasNext: page < totalPages,
+				hasPrev: page > 1,
+			};
+		} catch (error) {
+			console.error('Error fetching paginated inventory items:', error);
+			throw new Error(
+				'Database error while fetching paginated inventory items'
+			);
+		}
+	}
+
 	// Get a single inventory item by ID
 	static getItemById(id: number): InventoryItem | null {
 		try {
@@ -378,6 +424,105 @@ export class InventoryService {
 			console.error('Error fetching filtered inventory items:', error);
 			throw new Error(
 				'Database error while fetching filtered inventory items'
+			);
+		}
+	}
+
+	// Get paginated filtered items
+	static getPaginatedFilteredItems(
+		filters: {
+			status?: ValidStatus;
+			color?: string;
+			type?: string;
+			tags?: string[];
+			isFavorite?: boolean;
+		},
+		page: number = 1,
+		limit: number = 20
+	): {
+		items: InventoryItem[];
+		totalItems: number;
+		totalPages: number;
+		currentPage: number;
+		hasNext: boolean;
+		hasPrev: boolean;
+	} {
+		try {
+			const offset = (page - 1) * limit;
+
+			// Build the base query for filtering
+			let baseQuery = `FROM inventory WHERE 1=1`;
+			const params: any[] = [];
+
+			// Add status filter
+			if (filters.status) {
+				baseQuery += ` AND status = ?`;
+				params.push(filters.status);
+			}
+
+			// Add color filter
+			if (filters.color) {
+				baseQuery += ` AND LOWER(color) = LOWER(?)`;
+				params.push(filters.color);
+			}
+
+			// Add type filter
+			if (filters.type) {
+				baseQuery += ` AND LOWER(type) = LOWER(?)`;
+				params.push(filters.type);
+			}
+
+			// Add tags filter (contains any of the specified tags)
+			if (filters.tags && filters.tags.length > 0) {
+				const tagConditions = filters.tags
+					.map(() => `JSON_EXTRACT(tags, '$') LIKE ?`)
+					.join(' OR ');
+				baseQuery += ` AND (${tagConditions})`;
+				filters.tags.forEach((tag) => {
+					params.push(`%"${tag}"%`);
+				});
+			}
+
+			// Add favorites filter
+			if (filters.isFavorite !== undefined) {
+				baseQuery += ` AND isFavorite = ?`;
+				params.push(filters.isFavorite ? 1 : 0);
+			}
+
+			// Get total count
+			const countQuery = `SELECT COUNT(*) as count ${baseQuery}`;
+			const countResult = db.prepare(countQuery).get(...params) as any;
+			const totalItems = countResult.count;
+			const totalPages = Math.ceil(totalItems / limit);
+
+			// Get paginated items
+			const itemsQuery = `
+				SELECT id, title, frontImgUrl, backImgUrl, tags, status, color, type, isFavorite, createdAt, updatedAt
+				${baseQuery}
+				ORDER BY createdAt DESC
+				LIMIT ? OFFSET ?
+			`;
+
+			const rows = db
+				.prepare(itemsQuery)
+				.all(...params, limit, offset) as any[];
+			const items = rows.map(this.mapRowToInventoryItem);
+
+			return {
+				items,
+				totalItems,
+				totalPages,
+				currentPage: page,
+				hasNext: page < totalPages,
+				hasPrev: page > 1,
+			};
+		} catch (error) {
+			console.error(
+				'Error fetching paginated filtered inventory items:',
+				error
+			);
+			throw new Error(
+				'Database error while fetching paginated filtered inventory items'
 			);
 		}
 	}

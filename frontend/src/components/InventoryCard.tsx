@@ -6,7 +6,7 @@ import {
 	faSync,
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { InventoryItem } from 'src/types';
 
 interface InventoryCardProps {
@@ -27,11 +27,33 @@ export default function InventoryCard({
 	const [isSaved, setIsSaved] = useState(item.isFavorite);
 	const [showFrontImage, setShowFrontImage] = useState(true);
 	const [isUpdatingFavorite, setIsUpdatingFavorite] = useState(false);
+	const [imageLoaded, setImageLoaded] = useState(false);
+	const [isInView, setIsInView] = useState(false);
+	const cardRef = useRef<HTMLDivElement>(null);
 
 	// Sync with item prop when it changes (e.g., after refresh)
 	useEffect(() => {
 		setIsSaved(item.isFavorite);
 	}, [item.isFavorite]);
+
+	// Intersection Observer for lazy loading
+	useEffect(() => {
+		const observer = new IntersectionObserver(
+			([entry]) => {
+				if (entry.isIntersecting) {
+					setIsInView(true);
+					observer.disconnect(); // Stop observing once in view
+				}
+			},
+			{ threshold: 0.1 }
+		);
+
+		if (cardRef.current) {
+			observer.observe(cardRef.current);
+		}
+
+		return () => observer.disconnect();
+	}, []);
 
 	const handleToggleFavorite = async () => {
 		if (isUpdatingFavorite) return; // Prevent multiple simultaneous requests
@@ -73,17 +95,38 @@ export default function InventoryCard({
 	};
 
 	return (
-		<div className='flex flex-col w-70 h-fit m-3'>
-			<div className='relative w-full h-80 overflow-hidden border-secondary'>
-				<img
-					src={`${import.meta.env.VITE_API_URL}${
-						showFrontImage ? item.frontImgUrl : item.backImgUrl
-					}`}
-					className='w-full h-full object-cover'
-					alt={`${item.title} - ${
-						showFrontImage ? 'front' : 'back'
-					} view`}
-				/>
+		<div ref={cardRef} className='flex flex-col w-70 h-fit m-3'>
+			<div className='relative w-full h-80 overflow-hidden border-secondary bg-gray-800'>
+				{isInView ? (
+					<>
+						<img
+							src={`${import.meta.env.VITE_API_URL}${
+								showFrontImage
+									? item.frontImgUrl
+									: item.backImgUrl
+							}`}
+							className={`w-full h-full object-cover transition-opacity duration-300 ${
+								imageLoaded ? 'opacity-100' : 'opacity-0'
+							}`}
+							alt={`${item.title} - ${
+								showFrontImage ? 'front' : 'back'
+							} view`}
+							onLoad={() => setImageLoaded(true)}
+							loading='lazy'
+						/>
+						{!imageLoaded && (
+							<div className='absolute inset-0 flex items-center justify-center bg-gray-800'>
+								<div className='text-gray-400 text-sm'>
+									Loading...
+								</div>
+							</div>
+						)}
+					</>
+				) : (
+					<div className='absolute inset-0 flex items-center justify-center bg-gray-800'>
+						<div className='text-gray-400 text-sm'>📷</div>
+					</div>
+				)}
 				<div className='absolute top-2 left-2 bg-black bg-opacity-50 text-white text-xs px-2 py-1 rounded'>
 					{showFrontImage ? 'Front' : 'Back'}
 				</div>

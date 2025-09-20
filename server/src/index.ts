@@ -99,10 +99,27 @@ app.get('/', (req: Request, res: Response) => {
 	res.json({ message: 'Attire Inventory Server is running!' });
 });
 
-// Get all inventory items (with optional filtering)
+// Get all inventory items (with optional filtering and pagination)
 app.get('/api/inventory', (req: Request, res: Response) => {
 	try {
-		const { status, color, type, tags, isFavorite } = req.query;
+		const { status, color, type, tags, isFavorite, page, limit } =
+			req.query;
+
+		// Parse pagination parameters
+		const pageNumber = page ? parseInt(page as string, 10) : 1;
+		const itemsPerPage = limit ? parseInt(limit as string, 10) : 20;
+
+		// Validate pagination parameters
+		if (pageNumber < 1) {
+			res.status(400).json({
+				error: 'Page number must be greater than 0',
+			});
+			return;
+		}
+		if (itemsPerPage < 1 || itemsPerPage > 100) {
+			res.status(400).json({ error: 'Limit must be between 1 and 100' });
+			return;
+		}
 
 		// Check if any filters are applied
 		const hasFilters = status || color || type || tags || isFavorite;
@@ -143,12 +160,19 @@ app.get('/api/inventory', (req: Request, res: Response) => {
 				}
 			}
 
-			const items = InventoryService.getFilteredItems(filters);
-			res.json(items);
+			const result = InventoryService.getPaginatedFilteredItems(
+				filters,
+				pageNumber,
+				itemsPerPage
+			);
+			res.json(result);
 		} else {
-			// No filters applied, get all items
-			const items = InventoryService.getAllItems();
-			res.json(items);
+			// No filters applied, get paginated items
+			const result = InventoryService.getPaginatedItems(
+				pageNumber,
+				itemsPerPage
+			);
+			res.json(result);
 		}
 	} catch (error) {
 		console.error('Error fetching inventory items:', error);
