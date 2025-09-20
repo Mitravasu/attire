@@ -1,42 +1,15 @@
-import AddInventoryForm from '@components/AddInventoryForm';
-import Button from '@components/Button';
-import FilterPanel from '@components/FilterPanel';
-import InventoryPanel from '@components/InventoryPanel';
-import { useState } from 'react';
+import { Routes, Route } from 'react-router-dom';
+import Home from './pages/Home';
+import Outfits from './pages/Outfits';
+import Planner from './pages/Planner';
 
 function App() {
-	const [isFormVisible, setIsFormVisible] = useState(false);
-	const [filters, setFilters] = useState({
-		status: '',
-		color: '',
-		type: '',
-		isFavorite: '',
-	});
-
-	const handleFiltersChange = (newFilters: {
-		status: string;
-		color: string;
-		type: string;
-		isFavorite: string;
-	}) => {
-		setFilters(newFilters);
-	};
-
 	return (
-		<div className='flex space-x-4 h-full w-full'>
-			<AddInventoryForm
-				isVisible={isFormVisible}
-				setVisibility={setIsFormVisible}
-			/>
-			<FilterPanel onFiltersChange={handleFiltersChange} />
-			<div className='flex flex-col h-full w-full space-y-2'>
-				<Button
-					onClick={() => setIsFormVisible(true)}
-					label='Add Item'
-				/>
-				<InventoryPanel filters={filters} />
-			</div>
-		</div>
+		<Routes>
+			<Route path='/' element={<Home />} />
+			<Route path='/outfits' element={<Outfits />} />
+			<Route path='/planner' element={<Planner />} />
+		</Routes>
 	);
 }
 

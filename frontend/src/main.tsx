@@ -1,5 +1,6 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
+import { BrowserRouter as Router } from 'react-router-dom';
 import './index.css';
 import App from './App.tsx';
 import NavBar from '@components/NavBar.tsx';
@@ -22,10 +23,12 @@ function Layout({ children }: { children: React.ReactNode }) {
 // Update your app rendering to use the Layout
 createRoot(document.getElementById('root')!).render(
 	<StrictMode>
-		<div className='font-display bg-gray-800 text-white'>
-			<Layout>
-				<App />
-			</Layout>
-		</div>
+		<Router>
+			<div className='font-display bg-gray-800 text-white'>
+				<Layout>
+					<App />
+				</Layout>
+			</div>
+		</Router>
 	</StrictMode>
 );

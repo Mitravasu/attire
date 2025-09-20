@@ -16,9 +16,11 @@
 		"@fortawesome/free-solid-svg-icons": "^6.7.2",
 		"@fortawesome/react-fontawesome": "^0.2.2",
 		"@tailwindcss/vite": "^4.1.13",
+		"@types/react-router-dom": "^5.3.3",
 		"pocketbase": "^0.25.2",
 		"react": "^19.0.0",
 		"react-dom": "^19.0.0",
+		"react-router-dom": "^7.9.1",
 		"sqlite": "^5.1.1",
 		"tailwindcss": "^4.1.13"
 	},

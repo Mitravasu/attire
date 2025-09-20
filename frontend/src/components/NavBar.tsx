@@ -1,18 +1,26 @@
+import { Link } from 'react-router-dom';
+
 export default function NavBar() {
 	return (
 		<div className='flex justify-between p-2 w-full h-full'>
 			<div className='flex'>
-				<a href='/' className='text-2xl'>
+				<Link
+					to='/'
+					className='text-2xl hover:text-accent transition-colors'>
 					attire
-				</a>
+				</Link>
 			</div>
 			<div className='flex space-x-5'>
-				<a href='/outfits' className='text-2xl'>
+				<Link
+					to='/outfits'
+					className='text-2xl hover:text-accent transition-colors'>
 					Outfits
-				</a>
-				<a href='/planner' className='text-2xl'>
+				</Link>
+				<Link
+					to='/planner'
+					className='text-2xl hover:text-accent transition-colors'>
 					Planner
-				</a>
+				</Link>
 			</div>
 		</div>
 	);
