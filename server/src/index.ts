@@ -1,0 +1,589 @@
+import express, { Request, Response, NextFunction, Application } from 'express';
+import cors from 'cors';
+import bodyParser from 'body-parser';
+import multer, { StorageEngine } from 'multer';
+import path from 'path';
+import fs from 'fs';
+import {
+	InventoryItem,
+	InventoryRequest,
+	EditInventoryRequest,
+	StatusUpdateRequest,
+	DeleteRequest,
+	MulterError,
+	ValidStatus,
+} from './types';
+import { initializeDatabase } from './database';
+import { InventoryService } from './inventoryService';
+
+const app: Application = express();
+const PORT: number = parseInt(process.env.PORT || '3001', 10);
+
+// Ensure uploads directory exists
+const uploadsDir: string = path.join(__dirname, '..', 'uploads');
+if (!fs.existsSync(uploadsDir)) {
+	fs.mkdirSync(uploadsDir, { recursive: true });
+}
+
+// Configure multer for file uploads
+const storage: StorageEngine = multer.diskStorage({
+	destination: function (
+		req: Request,
+		file: Express.Multer.File,
+		cb: (error: Error | null, destination: string) => void
+	) {
+		cb(null, uploadsDir);
+	},
+	filename: function (
+		req: Request,
+		file: Express.Multer.File,
+		cb: (error: Error | null, filename: string) => void
+	) {
+		// Create unique filename with timestamp
+		const uniqueSuffix: string =
+			Date.now() + '-' + Math.round(Math.random() * 1e9);
+		cb(
+			null,
+			file.fieldname +
+				'-' +
+				uniqueSuffix +
+				path.extname(file.originalname)
+		);
+	},
+});
+
+const upload = multer({
+	storage: storage,
+	limits: {
+		fileSize: 5 * 1024 * 1024, // 5MB limit
+	},
+	fileFilter: (
+		req: Request,
+		file: Express.Multer.File,
+		cb: multer.FileFilterCallback
+	) => {
+		// Accept only image files
+		if (file.mimetype.startsWith('image/')) {
+			cb(null, true);
+		} else {
+			cb(new Error('Only image files are allowed!') as MulterError);
+		}
+	},
+});
+
+// Configure multer for multiple files (front and back images)
+const uploadMultiple = upload.fields([
+	{ name: 'frontImage', maxCount: 1 },
+	{ name: 'backImage', maxCount: 1 },
+]);
+
+// Middleware
+app.use(cors());
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+
+// Serve uploaded files statically
+app.use('/uploads', express.static(uploadsDir));
+
+// Initialize database
+initializeDatabase();
+
+// Validation function for status
+const isValidStatus = (status: string): status is ValidStatus => {
+	const validStatuses: ValidStatus[] = ['dirty', 'washed', 'ironed'];
+	return validStatuses.includes(status.toLowerCase() as ValidStatus);
+};
+
+// Basic health check route
+app.get('/', (req: Request, res: Response) => {
+	res.json({ message: 'Attire Inventory Server is running!' });
+});
+
+// Get all inventory items (with optional filtering and pagination)
+app.get('/api/inventory', (req: Request, res: Response) => {
+	try {
+		const { status, color, type, tags, isFavorite, page, limit } =
+			req.query;
+
+		// Parse pagination parameters
+		const pageNumber = page ? parseInt(page as string, 10) : 1;
+		const itemsPerPage = limit ? parseInt(limit as string, 10) : 20;
+
+		// Validate pagination parameters
+		if (pageNumber < 1) {
+			res.status(400).json({
+				error: 'Page number must be greater than 0',
+			});
+			return;
+		}
+		if (itemsPerPage < 1 || itemsPerPage > 100) {
+			res.status(400).json({ error: 'Limit must be between 1 and 100' });
+			return;
+		}
+
+		// Check if any filters are applied
+		const hasFilters = status || color || type || tags || isFavorite;
+
+		if (hasFilters) {
+			// Prepare filters object
+			const filters: any = {};
+
+			if (status && isValidStatus(status as string)) {
+				filters.status = status as ValidStatus;
+			}
+
+			if (color && typeof color === 'string') {
+				filters.color = color;
+			}
+
+			if (type && typeof type === 'string') {
+				filters.type = type;
+			}
+
+			if (tags) {
+				// Handle tags as either a single tag or array of tags
+				if (typeof tags === 'string') {
+					filters.tags = [tags];
+				} else if (Array.isArray(tags)) {
+					filters.tags = tags.filter(
+						(tag) => typeof tag === 'string'
+					);
+				}
+			}
+
+			if (isFavorite !== undefined) {
+				// Handle favorites filter - convert string to boolean
+				if (typeof isFavorite === 'string') {
+					filters.isFavorite = isFavorite.toLowerCase() === 'true';
+				} else if (typeof isFavorite === 'boolean') {
+					filters.isFavorite = isFavorite;
+				}
+			}
+
+			const result = InventoryService.getPaginatedFilteredItems(
+				filters,
+				pageNumber,
+				itemsPerPage
+			);
+			res.json(result);
+		} else {
+			// No filters applied, get paginated items
+			const result = InventoryService.getPaginatedItems(
+				pageNumber,
+				itemsPerPage
+			);
+			res.json(result);
+		}
+	} catch (error) {
+		console.error('Error fetching inventory items:', error);
+		res.status(500).json({
+			error: 'Internal server error while fetching inventory items',
+		});
+	}
+});
+
+// Get unique filter values for dropdowns
+app.get('/api/inventory/filters', (req: Request, res: Response) => {
+	try {
+		const filterValues = InventoryService.getUniqueFilterValues();
+		res.json(filterValues);
+	} catch (error) {
+		console.error('Error fetching filter values:', error);
+		res.status(500).json({
+			error: 'Internal server error while fetching filter values',
+		});
+	}
+});
+
+// Add new inventory item
+app.post(
+	'/api/inventory',
+	uploadMultiple,
+	(req: InventoryRequest, res: Response): void => {
+		try {
+			const { title, tags, status, color, type } = req.body;
+			const files = req.files as {
+				[fieldname: string]: Express.Multer.File[];
+			};
+
+			// Validation
+			if (!title || typeof title !== 'string' || title.trim() === '') {
+				res.status(400).json({
+					error: 'Title is required and must be a non-empty string',
+				});
+				return;
+			}
+
+			if (!files || !files.frontImage) {
+				res.status(400).json({
+					error: 'Front image file is required',
+				});
+				return;
+			}
+
+			if (!tags) {
+				res.status(400).json({
+					error: 'Tags are required',
+				});
+				return;
+			}
+
+			// Parse tags - handle both string and array inputs
+			let parsedTags: string[];
+			try {
+				if (typeof tags === 'string') {
+					// If tags is a comma-separated string, split it
+					parsedTags = tags
+						.split(',')
+						.map((tag: string) => tag.trim())
+						.filter((tag: string) => tag !== '');
+				} else if (Array.isArray(tags)) {
+					parsedTags = tags
+						.map((tag: any) => tag.toString().trim())
+						.filter((tag: string) => tag !== '');
+				} else {
+					throw new Error('Invalid tags format');
+				}
+			} catch (error) {
+				res.status(400).json({
+					error: 'Tags must be a comma-separated string or an array',
+				});
+				return;
+			}
+
+			if (!status || !isValidStatus(status)) {
+				res.status(400).json({
+					error: 'Status is required and must be one of: dirty, washed, ironed',
+				});
+				return;
+			}
+
+			if (!color || typeof color !== 'string' || color.trim() === '') {
+				res.status(400).json({
+					error: 'Color is required and must be a non-empty string',
+				});
+				return;
+			}
+
+			if (!type || typeof type !== 'string' || type.trim() === '') {
+				res.status(400).json({
+					error: 'Type is required and must be a non-empty string',
+				});
+				return;
+			}
+
+			// Create image URLs relative to server
+			const frontImgUrl: string = `/uploads/${files.frontImage[0].filename}`;
+			const backImgUrl: string | null = files.backImage
+				? `/uploads/${files.backImage[0].filename}`
+				: null;
+
+			// Create new inventory item using database service
+			const newItem: InventoryItem = InventoryService.createItem(
+				title.trim(),
+				frontImgUrl,
+				backImgUrl,
+				parsedTags,
+				status.toLowerCase() as ValidStatus,
+				color.trim(),
+				type.trim()
+			);
+
+			res.status(201).json({
+				message: 'Inventory item added successfully',
+				item: newItem,
+			});
+		} catch (error) {
+			console.error('Error adding inventory item:', error);
+			res.status(500).json({
+				error: 'Internal server error while adding inventory item',
+			});
+		}
+	}
+);
+
+// Update inventory item
+app.put(
+	'/api/inventory/:id',
+	uploadMultiple,
+	(req: EditInventoryRequest, res: Response): void => {
+		try {
+			const id: number = parseInt(req.params.id, 10);
+			const { title, tags, status, color, type } = req.body;
+			const files = req.files as {
+				[fieldname: string]: Express.Multer.File[];
+			};
+
+			// Check if item exists
+			const existingItem = InventoryService.getItemById(id);
+			if (!existingItem) {
+				res.status(404).json({
+					error: 'Inventory item not found',
+				});
+				return;
+			}
+
+			// Validate title if provided
+			if (
+				title !== undefined &&
+				(typeof title !== 'string' || title.trim() === '')
+			) {
+				res.status(400).json({
+					error: 'Title must be a non-empty string if provided',
+				});
+				return;
+			}
+
+			// Parse and validate tags if provided
+			let parsedTags: string[] | undefined;
+			if (tags !== undefined) {
+				try {
+					if (typeof tags === 'string') {
+						parsedTags = tags
+							.split(',')
+							.map((tag: string) => tag.trim())
+							.filter((tag: string) => tag !== '');
+					} else if (Array.isArray(tags)) {
+						parsedTags = tags
+							.map((tag: any) => tag.toString().trim())
+							.filter((tag: string) => tag !== '');
+					} else {
+						throw new Error('Invalid tags format');
+					}
+				} catch (error) {
+					res.status(400).json({
+						error: 'Tags must be a comma-separated string or an array if provided',
+					});
+					return;
+				}
+			}
+
+			// Validate status if provided
+			if (status !== undefined && !isValidStatus(status)) {
+				res.status(400).json({
+					error: 'Status must be one of: dirty, washed, ironed if provided',
+				});
+				return;
+			}
+
+			// Validate color if provided
+			if (
+				color !== undefined &&
+				(typeof color !== 'string' || color.trim() === '')
+			) {
+				res.status(400).json({
+					error: 'Color must be a non-empty string if provided',
+				});
+				return;
+			}
+
+			// Validate type if provided
+			if (
+				type !== undefined &&
+				(typeof type !== 'string' || type.trim() === '')
+			) {
+				res.status(400).json({
+					error: 'Type must be a non-empty string if provided',
+				});
+				return;
+			}
+
+			// Handle image updates
+			let frontImgUrl: string | undefined;
+			let backImgUrl: string | null | undefined;
+			if (files && files.frontImage) {
+				frontImgUrl = `/uploads/${files.frontImage[0].filename}`;
+			}
+			if (files && files.backImage) {
+				backImgUrl = `/uploads/${files.backImage[0].filename}`;
+			}
+
+			// Update the inventory item
+			const updatedItem: InventoryItem | null =
+				InventoryService.updateItem(
+					id,
+					title?.trim(),
+					frontImgUrl,
+					backImgUrl,
+					parsedTags,
+					status?.toLowerCase() as ValidStatus,
+					color?.trim(),
+					type?.trim()
+				);
+
+			if (!updatedItem) {
+				res.status(404).json({
+					error: 'Inventory item not found',
+				});
+				return;
+			}
+
+			res.json({
+				message: 'Inventory item updated successfully',
+				item: updatedItem,
+			});
+		} catch (error) {
+			console.error('Error updating inventory item:', error);
+			res.status(500).json({
+				error: 'Internal server error while updating inventory item',
+			});
+		}
+	}
+);
+
+// Delete inventory item by ID
+app.delete('/api/inventory/:id', (req: DeleteRequest, res: Response): void => {
+	try {
+		const id: number = parseInt(req.params.id, 10);
+
+		// Get the item before deleting to return it in response
+		const itemToDelete: InventoryItem | null =
+			InventoryService.getItemById(id);
+
+		if (!itemToDelete) {
+			res.status(404).json({
+				error: 'Inventory item not found',
+			});
+			return;
+		}
+
+		const deleted: boolean = InventoryService.deleteItem(id);
+
+		if (deleted) {
+			res.json({
+				message: 'Inventory item deleted successfully',
+				item: itemToDelete,
+			});
+		} else {
+			res.status(404).json({
+				error: 'Inventory item not found',
+			});
+		}
+	} catch (error) {
+		console.error('Error deleting inventory item:', error);
+		res.status(500).json({
+			error: 'Internal server error while deleting inventory item',
+		});
+	}
+});
+
+// Update inventory item status
+app.patch(
+	'/api/inventory/:id/status',
+	(req: StatusUpdateRequest, res: Response): void => {
+		try {
+			const id: number = parseInt(req.params.id, 10);
+			const { status } = req.body;
+
+			if (!status || !isValidStatus(status)) {
+				res.status(400).json({
+					error: 'Status is required and must be one of: dirty, washed, ironed',
+				});
+				return;
+			}
+
+			const updatedItem: InventoryItem | null =
+				InventoryService.updateItemStatus(
+					id,
+					status.toLowerCase() as ValidStatus
+				);
+
+			if (!updatedItem) {
+				res.status(404).json({
+					error: 'Inventory item not found',
+				});
+				return;
+			}
+
+			res.json({
+				message: 'Inventory item status updated successfully',
+				item: updatedItem,
+			});
+		} catch (error) {
+			console.error('Error updating inventory item status:', error);
+			res.status(500).json({
+				error: 'Internal server error while updating inventory item status',
+			});
+		}
+	}
+);
+
+// Update inventory item favorite status
+app.patch(
+	'/api/inventory/:id/favorite',
+	(req: Request, res: Response): void => {
+		try {
+			const id: number = parseInt(req.params.id, 10);
+			const { isFavorite } = req.body;
+
+			if (typeof isFavorite !== 'boolean') {
+				res.status(400).json({
+					error: 'isFavorite is required and must be a boolean',
+				});
+				return;
+			}
+
+			const updatedItem: InventoryItem | null =
+				InventoryService.updateItemFavoriteStatus(id, isFavorite);
+
+			if (!updatedItem) {
+				res.status(404).json({
+					error: 'Inventory item not found',
+				});
+				return;
+			}
+
+			res.json({
+				message: 'Inventory item favorite status updated successfully',
+				item: updatedItem,
+			});
+		} catch (error) {
+			console.error(
+				'Error updating inventory item favorite status:',
+				error
+			);
+			res.status(500).json({
+				error: 'Internal server error while updating inventory item favorite status',
+			});
+		}
+	}
+);
+
+// Error handling middleware
+app.use(
+	(
+		err: MulterError,
+		req: Request,
+		res: Response,
+		next: NextFunction
+	): void => {
+		console.error(err.stack);
+		if (err.message === 'Only image files are allowed!') {
+			res.status(400).json({ error: err.message });
+			return;
+		}
+		res.status(500).json({ error: 'Something went wrong!' });
+	}
+);
+
+// 404 handler
+app.use('*', (req: Request, res: Response) => {
+	res.status(404).json({ error: 'Route not found' });
+});
+
+// Start server
+app.listen(PORT, () => {
+	console.log(`Server is running on port ${PORT}`);
+	console.log(`Health check: http://localhost:${PORT}`);
+	console.log(`API endpoints:`);
+	console.log(`  GET    /api/inventory     - Get all inventory items`);
+	console.log(`  POST   /api/inventory     - Add new inventory item`);
+	console.log(`  PUT    /api/inventory/:id - Update inventory item`);
+	console.log(`  DELETE /api/inventory/:id - Delete inventory item`);
+	console.log(`  PATCH  /api/inventory/:id/status - Update item status`);
+	console.log(
+		`  PATCH  /api/inventory/:id/favorite - Update item favorite status`
+	);
+});
+
+export default app;

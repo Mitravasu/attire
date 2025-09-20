@@ -1,12 +1,15 @@
-import Display from '@components/Display';
-import FilterBar from '@components/FilterBar';
+import { Routes, Route } from 'react-router-dom';
+import Home from './pages/Home';
+import Outfits from './pages/Outfits';
+import Planner from './pages/Planner';
 
 function App() {
 	return (
-		<div className='flex h-screen font-display p-4 space-x-4 bg-primary text-secondary'>
-			<FilterBar />
-			<Display />
-		</div>
+		<Routes>
+			<Route path='/' element={<Home />} />
+			<Route path='/outfits' element={<Outfits />} />
+			<Route path='/planner' element={<Planner />} />
+		</Routes>
 	);
 }
 
