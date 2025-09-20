@@ -72,11 +72,32 @@ export default function DeleteConfirmationModal({
 					Are you sure you want to delete "{item.title}"?
 				</p>
 				<div className='bg-gray-100 p-4 rounded-md'>
-					<img
-						src={`${import.meta.env.VITE_API_URL}${item.imgUrl}`}
-						alt={item.title}
-						className='w-24 h-24 object-cover border rounded mx-auto mb-2'
-					/>
+					<div className='flex space-x-2 justify-center mb-2'>
+						<div className='text-center'>
+							<p className='text-xs text-gray-500 mb-1'>Front</p>
+							<img
+								src={`${import.meta.env.VITE_API_URL}${
+									item.frontImgUrl
+								}`}
+								alt={`${item.title} - front`}
+								className='w-12 h-12 object-cover border rounded'
+							/>
+						</div>
+						{item.backImgUrl && (
+							<div className='text-center'>
+								<p className='text-xs text-gray-500 mb-1'>
+									Back
+								</p>
+								<img
+									src={`${import.meta.env.VITE_API_URL}${
+										item.backImgUrl
+									}`}
+									alt={`${item.title} - back`}
+									className='w-12 h-12 object-cover border rounded'
+								/>
+							</div>
+						)}
+					</div>
 					<p className='text-sm text-gray-600'>
 						Tags: {item.tags.join(', ')}
 					</p>

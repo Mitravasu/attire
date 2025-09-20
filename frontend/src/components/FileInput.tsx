@@ -4,12 +4,14 @@ export default function FileInput({
 	onChange,
 	accept,
 	selectedFile,
+	required = false,
 }: {
 	label: string;
 	id: string;
 	onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 	selectedFile: File | null;
 	accept: string;
+	required?: boolean;
 }) {
 	return (
 		<div>
@@ -22,7 +24,7 @@ export default function FileInput({
 				name={id}
 				accept={accept}
 				onChange={onChange}
-				required
+				required={required}
 				className='w-full px-3 py-2 border border-gray-300 rounded-md bg-black focus:outline-none focus:ring-2 focus:ring-blue-500'
 			/>
 			{selectedFile && (

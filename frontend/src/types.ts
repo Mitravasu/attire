@@ -2,7 +2,8 @@ export type InventoryItem = {
 	id: number;
 	title: string;
 	tags: string[];
-	imgUrl: string;
+	frontImgUrl: string;
+	backImgUrl?: string; // Optional back image
 	status: 'dirty' | 'washed' | 'ironed';
 	createdAt: string;
 	updatedAt?: string;

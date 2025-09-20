@@ -3,6 +3,7 @@ import {
 	faBookmark as saved,
 	faEdit,
 	faTrash,
+	faSync,
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useState } from 'react';
@@ -24,12 +25,34 @@ export default function InventoryCard({
 	});
 
 	const [isSaved, setIsSaved] = useState(false);
+	const [showFrontImage, setShowFrontImage] = useState(true);
 
 	return (
 		<div className='flex flex-col w-70 h-fit m-3'>
-			<img
-				src={`${import.meta.env.VITE_API_URL}${item.imgUrl}`}
-				className='w-full border-secondary h-80 overflow-hidden'></img>
+			<div className='relative w-full h-80 overflow-hidden border-secondary'>
+				<img
+					src={`${import.meta.env.VITE_API_URL}${
+						showFrontImage ? item.frontImgUrl : item.backImgUrl
+					}`}
+					className='w-full h-full object-cover'
+					alt={`${item.title} - ${
+						showFrontImage ? 'front' : 'back'
+					} view`}
+				/>
+				<div className='absolute top-2 left-2 bg-black bg-opacity-50 text-white text-xs px-2 py-1 rounded'>
+					{showFrontImage ? 'Front' : 'Back'}
+				</div>
+				{item.backImgUrl && (
+					<button
+						onClick={() => setShowFrontImage(!showFrontImage)}
+						className='absolute top-2 right-2 bg-black bg-opacity-50 text-white p-2 rounded hover:bg-opacity-75 transition-all'
+						title={`Switch to ${
+							showFrontImage ? 'back' : 'front'
+						} view`}>
+						<FontAwesomeIcon icon={faSync} />
+					</button>
+				)}
+			</div>
 			<div className='flex flex-col w-full h-30 pt-1'>
 				<div className='flex w-full justify-between items-center'>
 					<p className='text-md'>{item.title.toUpperCase()}</p>

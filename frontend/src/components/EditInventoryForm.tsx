@@ -25,7 +25,10 @@ export default function EditInventoryForm({
 		tags: '',
 		status: 'dirty' as 'dirty' | 'washed' | 'ironed',
 	});
-	const [selectedFile, setSelectedFile] = useState<File | null>(null);
+	const [selectedFrontFile, setSelectedFrontFile] = useState<File | null>(
+		null
+	);
+	const [selectedBackFile, setSelectedBackFile] = useState<File | null>(null);
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 	const [success, setSuccess] = useState<string | null>(null);
@@ -51,22 +54,42 @@ export default function EditInventoryForm({
 		}));
 	};
 
-	const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+	const handleFrontFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const file = e.target.files?.[0];
 		if (file) {
 			// Validate file type
 			if (!file.type.startsWith('image/')) {
-				setError('Please select an image file');
+				setError('Please select an image file for front image');
 				return;
 			}
 
 			// Validate file size (5MB limit)
 			if (file.size > 5 * 1024 * 1024) {
-				setError('File size must be less than 5MB');
+				setError('Front image file size must be less than 5MB');
 				return;
 			}
 
-			setSelectedFile(file);
+			setSelectedFrontFile(file);
+			setError(null);
+		}
+	};
+
+	const handleBackFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+		const file = e.target.files?.[0];
+		if (file) {
+			// Validate file type
+			if (!file.type.startsWith('image/')) {
+				setError('Please select an image file for back image');
+				return;
+			}
+
+			// Validate file size (5MB limit)
+			if (file.size > 5 * 1024 * 1024) {
+				setError('Back image file size must be less than 5MB');
+				return;
+			}
+
+			setSelectedBackFile(file);
 			setError(null);
 		}
 	};
@@ -95,9 +118,12 @@ export default function EditInventoryForm({
 			formDataToSend.append('tags', formData.tags.trim());
 			formDataToSend.append('status', formData.status);
 
-			// Only append image if a new one was selected
-			if (selectedFile) {
-				formDataToSend.append('image', selectedFile);
+			// Only append images if new ones were selected
+			if (selectedFrontFile) {
+				formDataToSend.append('frontImage', selectedFrontFile);
+			}
+			if (selectedBackFile) {
+				formDataToSend.append('backImage', selectedBackFile);
 			}
 
 			// Send to server
@@ -121,14 +147,21 @@ export default function EditInventoryForm({
 			onItemUpdated(); // Callback to refresh the inventory list
 
 			// Reset form
-			setSelectedFile(null);
+			setSelectedFrontFile(null);
+			setSelectedBackFile(null);
 
-			// Reset file input
-			const fileInput = document.getElementById(
-				'edit-image'
+			// Reset file inputs
+			const frontFileInput = document.getElementById(
+				'edit-front-image'
 			) as HTMLInputElement;
-			if (fileInput) {
-				fileInput.value = '';
+			if (frontFileInput) {
+				frontFileInput.value = '';
+			}
+			const backFileInput = document.getElementById(
+				'edit-back-image'
+			) as HTMLInputElement;
+			if (backFileInput) {
+				backFileInput.value = '';
 			}
 
 			// Close modal after short delay
@@ -147,14 +180,21 @@ export default function EditInventoryForm({
 		setVisibility(false);
 		setError(null);
 		setSuccess(null);
-		setSelectedFile(null);
+		setSelectedFrontFile(null);
+		setSelectedBackFile(null);
 
-		// Reset file input
-		const fileInput = document.getElementById(
-			'edit-image'
+		// Reset file inputs
+		const frontFileInput = document.getElementById(
+			'edit-front-image'
 		) as HTMLInputElement;
-		if (fileInput) {
-			fileInput.value = '';
+		if (frontFileInput) {
+			frontFileInput.value = '';
+		}
+		const backFileInput = document.getElementById(
+			'edit-back-image'
+		) as HTMLInputElement;
+		if (backFileInput) {
+			backFileInput.value = '';
 		}
 	};
 
@@ -162,7 +202,7 @@ export default function EditInventoryForm({
 
 	return (
 		<div
-			className={`fixed inset-0 items-center self-center justify-self-center z-50 backdrop-blur-md border-2 border-white p-4 rounded-md w-1/4 h-fit flex flex-col ${
+			className={`fixed inset-0 items-center self-center justify-self-center bg-black/50 z-50 backdrop-blur-md border-2 border-white p-4 rounded-md w-1/4 h-fit flex flex-col ${
 				isVisible ? '' : 'hidden'
 			}`}>
 			<h2 className='text-2xl font-bold mb-6'>Edit Inventory Item</h2>
@@ -190,19 +230,58 @@ export default function EditInventoryForm({
 				/>
 
 				<div className='space-y-2'>
-					<label className='text-sm font-medium'>Current Image</label>
-					<img
-						src={`${import.meta.env.VITE_API_URL}${item.imgUrl}`}
-						alt={item.title}
-						className='w-20 h-20 object-cover border rounded'
-					/>
+					<label className='text-sm font-medium'>
+						Current Images
+					</label>
+					<div className='flex space-x-4'>
+						<div className='text-center'>
+							<p className='text-xs mb-1'>Front</p>
+							<img
+								src={`${import.meta.env.VITE_API_URL}${
+									item.frontImgUrl
+								}`}
+								alt={`${item.title} - front`}
+								className='w-20 h-20 object-cover border rounded'
+							/>
+						</div>
+						{item.backImgUrl && (
+							<div className='text-center'>
+								<p className='text-xs mb-1'>Back</p>
+								<img
+									src={`${import.meta.env.VITE_API_URL}${
+										item.backImgUrl
+									}`}
+									alt={`${item.title} - back`}
+									className='w-20 h-20 object-cover border rounded'
+								/>
+							</div>
+						)}
+						{!item.backImgUrl && (
+							<div className='text-center'>
+								<p className='text-xs mb-1'>Back</p>
+								<div className='w-20 h-20 border rounded bg-gray-200 flex items-center justify-center'>
+									<span className='text-xs text-gray-500'>
+										No back image
+									</span>
+								</div>
+							</div>
+						)}
+					</div>
 				</div>
 
 				<FileInput
-					label='New Image (optional)'
-					id='edit-image'
-					onChange={handleFileChange}
-					selectedFile={selectedFile}
+					label='New Front Image (optional)'
+					id='edit-front-image'
+					onChange={handleFrontFileChange}
+					selectedFile={selectedFrontFile}
+					accept='image/*'
+				/>
+
+				<FileInput
+					label='New Back Image (optional)'
+					id='edit-back-image'
+					onChange={handleBackFileChange}
+					selectedFile={selectedBackFile}
 					accept='image/*'
 				/>
 

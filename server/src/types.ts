@@ -3,7 +3,8 @@ import { Request } from 'express';
 export interface InventoryItem {
 	id: number;
 	title: string;
-	imgUrl: string;
+	frontImgUrl: string;
+	backImgUrl?: string; // Optional back image
 	tags: string[];
 	status: 'dirty' | 'washed' | 'ironed';
 	createdAt: string;

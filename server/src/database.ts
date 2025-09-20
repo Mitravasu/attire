@@ -1,6 +1,8 @@
 import Database, { Database as DatabaseType } from 'better-sqlite3';
 import path from 'path';
 import fs from 'fs';
+import { migrateDatabase } from './migrate-database';
+import { migrateBackImgUrlOptional } from './migrate-back-img-optional';
 
 // Database setup
 const dbDir = path.join(__dirname, '..', 'data');
@@ -23,7 +25,8 @@ const createInventoryTable = db.prepare(`
 	CREATE TABLE IF NOT EXISTS inventory (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
 		title TEXT NOT NULL,
-		imgUrl TEXT NOT NULL,
+		frontImgUrl TEXT NOT NULL,
+		backImgUrl TEXT, -- Optional back image
 		tags TEXT NOT NULL, -- JSON string of tags array
 		status TEXT NOT NULL CHECK(status IN ('dirty', 'washed', 'ironed')),
 		createdAt TEXT NOT NULL,
@@ -34,7 +37,15 @@ const createInventoryTable = db.prepare(`
 // Initialize database tables
 export const initializeDatabase = (): void => {
 	try {
+		// First, try to create the table (this handles fresh installs)
 		createInventoryTable.run();
+
+		// Then run migration for existing databases
+		migrateDatabase();
+
+		// Make backImgUrl optional
+		migrateBackImgUrlOptional();
+
 		console.log('Database tables initialized successfully');
 	} catch (error) {
 		console.error('Error initializing database:', error);

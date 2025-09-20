@@ -20,7 +20,10 @@ export default function AddInventoryForm({
 		tags: '',
 		status: 'dirty' as 'dirty' | 'washed' | 'ironed',
 	});
-	const [selectedFile, setSelectedFile] = useState<File | null>(null);
+	const [selectedFrontFile, setSelectedFrontFile] = useState<File | null>(
+		null
+	);
+	const [selectedBackFile, setSelectedBackFile] = useState<File | null>(null);
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 	const [success, setSuccess] = useState<string | null>(null);
@@ -35,22 +38,42 @@ export default function AddInventoryForm({
 		}));
 	};
 
-	const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+	const handleFrontFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const file = e.target.files?.[0];
 		if (file) {
 			// Validate file type
 			if (!file.type.startsWith('image/')) {
-				setError('Please select an image file');
+				setError('Please select an image file for front image');
 				return;
 			}
 
 			// Validate file size (5MB limit)
 			if (file.size > 5 * 1024 * 1024) {
-				setError('File size must be less than 5MB');
+				setError('Front image file size must be less than 5MB');
 				return;
 			}
 
-			setSelectedFile(file);
+			setSelectedFrontFile(file);
+			setError(null);
+		}
+	};
+
+	const handleBackFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+		const file = e.target.files?.[0];
+		if (file) {
+			// Validate file type
+			if (!file.type.startsWith('image/')) {
+				setError('Please select an image file for back image');
+				return;
+			}
+
+			// Validate file size (5MB limit)
+			if (file.size > 5 * 1024 * 1024) {
+				setError('Back image file size must be less than 5MB');
+				return;
+			}
+
+			setSelectedBackFile(file);
 			setError(null);
 		}
 	};
@@ -67,8 +90,8 @@ export default function AddInventoryForm({
 				throw new Error('Title is required');
 			}
 
-			if (!selectedFile) {
-				throw new Error('Please select an image file');
+			if (!selectedFrontFile) {
+				throw new Error('Please select a front image file');
 			}
 
 			if (!formData.tags.trim()) {
@@ -80,7 +103,10 @@ export default function AddInventoryForm({
 			formDataToSend.append('title', formData.title.trim());
 			formDataToSend.append('tags', formData.tags.trim());
 			formDataToSend.append('status', formData.status);
-			formDataToSend.append('image', selectedFile);
+			formDataToSend.append('frontImage', selectedFrontFile);
+			if (selectedBackFile) {
+				formDataToSend.append('backImage', selectedBackFile);
+			}
 
 			// Send to server
 			const response = await fetch(
@@ -105,14 +131,21 @@ export default function AddInventoryForm({
 				tags: '',
 				status: 'dirty',
 			});
-			setSelectedFile(null);
+			setSelectedFrontFile(null);
+			setSelectedBackFile(null);
 
-			// Reset file input
-			const fileInput = document.getElementById(
-				'image'
+			// Reset file inputs
+			const frontFileInput = document.getElementById(
+				'frontImage'
 			) as HTMLInputElement;
-			if (fileInput) {
-				fileInput.value = '';
+			if (frontFileInput) {
+				frontFileInput.value = '';
+			}
+			const backFileInput = document.getElementById(
+				'backImage'
+			) as HTMLInputElement;
+			if (backFileInput) {
+				backFileInput.value = '';
 			}
 		} catch (err) {
 			setError(err instanceof Error ? err.message : 'An error occurred');
@@ -124,10 +157,22 @@ export default function AddInventoryForm({
 
 	return (
 		<div
-			className={`fixed inset-0 items-center self-center justify-self-center z-50 backdrop-blur-md border-2 border-white p-4 rounded-md w-1/4 h-fit flex flex-col ${
+			className={`fixed inset-0 items-center self-center justify-self-center z-50 bg-black/50 backdrop-blur-md border-2 border-white p-4 rounded-md w-1/4 h-fit flex flex-col ${
 				isVisible ? '' : 'hidden'
 			}`}>
 			<h2 className='text-2xl font-bold mb-6'>Add New Inventory Item</h2>
+
+			{error && (
+				<div className='w-full p-3 mb-4 text-red-700 bg-red-100 border border-red-300 rounded'>
+					{error}
+				</div>
+			)}
+
+			{success && (
+				<div className='w-full p-3 mb-4 text-green-700 bg-green-100 border border-green-300 rounded'>
+					{success}
+				</div>
+			)}
 
 			<form onSubmit={handleSubmit} className='space-y-4'>
 				<TextInput
@@ -139,11 +184,20 @@ export default function AddInventoryForm({
 					required
 				/>
 				<FileInput
-					label='Image *'
-					id='image'
-					onChange={handleFileChange}
-					selectedFile={selectedFile}
+					label='Front Image *'
+					id='frontImage'
+					onChange={handleFrontFileChange}
+					selectedFile={selectedFrontFile}
 					accept='image/*'
+					required
+				/>
+				<FileInput
+					label='Back Image (optional)'
+					id='backImage'
+					onChange={handleBackFileChange}
+					selectedFile={selectedBackFile}
+					accept='image/*'
+					required={false}
 				/>
 				<TextInput
 					id='tags'

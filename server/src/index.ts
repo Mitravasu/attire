@@ -71,6 +71,12 @@ const upload = multer({
 	},
 });
 
+// Configure multer for multiple files (front and back images)
+const uploadMultiple = upload.fields([
+	{ name: 'frontImage', maxCount: 1 },
+	{ name: 'backImage', maxCount: 1 },
+]);
+
 // Middleware
 app.use(cors());
 app.use(bodyParser.json());
@@ -109,10 +115,13 @@ app.get('/api/inventory', (req: Request, res: Response) => {
 // Add new inventory item
 app.post(
 	'/api/inventory',
-	upload.single('image'),
+	uploadMultiple,
 	(req: InventoryRequest, res: Response): void => {
 		try {
 			const { title, tags, status } = req.body;
+			const files = req.files as {
+				[fieldname: string]: Express.Multer.File[];
+			};
 
 			// Validation
 			if (!title || typeof title !== 'string' || title.trim() === '') {
@@ -122,9 +131,9 @@ app.post(
 				return;
 			}
 
-			if (!req.file) {
+			if (!files || !files.frontImage) {
 				res.status(400).json({
-					error: 'Image file is required',
+					error: 'Front image file is required',
 				});
 				return;
 			}
@@ -166,13 +175,17 @@ app.post(
 				return;
 			}
 
-			// Create image URL relative to server
-			const imgUrl: string = `/uploads/${req.file.filename}`;
+			// Create image URLs relative to server
+			const frontImgUrl: string = `/uploads/${files.frontImage[0].filename}`;
+			const backImgUrl: string | null = files.backImage
+				? `/uploads/${files.backImage[0].filename}`
+				: null;
 
 			// Create new inventory item using database service
 			const newItem: InventoryItem = InventoryService.createItem(
 				title.trim(),
-				imgUrl,
+				frontImgUrl,
+				backImgUrl,
 				parsedTags,
 				status.toLowerCase() as ValidStatus
 			);
@@ -193,11 +206,14 @@ app.post(
 // Update inventory item
 app.put(
 	'/api/inventory/:id',
-	upload.single('image'),
+	uploadMultiple,
 	(req: EditInventoryRequest, res: Response): void => {
 		try {
 			const id: number = parseInt(req.params.id, 10);
 			const { title, tags, status } = req.body;
+			const files = req.files as {
+				[fieldname: string]: Express.Multer.File[];
+			};
 
 			// Check if item exists
 			const existingItem = InventoryService.getItemById(id);
@@ -251,10 +267,14 @@ app.put(
 				return;
 			}
 
-			// Handle image update
-			let imgUrl: string | undefined;
-			if (req.file) {
-				imgUrl = `/uploads/${req.file.filename}`;
+			// Handle image updates
+			let frontImgUrl: string | undefined;
+			let backImgUrl: string | null | undefined;
+			if (files && files.frontImage) {
+				frontImgUrl = `/uploads/${files.frontImage[0].filename}`;
+			}
+			if (files && files.backImage) {
+				backImgUrl = `/uploads/${files.backImage[0].filename}`;
 			}
 
 			// Update the inventory item
@@ -262,7 +282,8 @@ app.put(
 				InventoryService.updateItem(
 					id,
 					title?.trim(),
-					imgUrl,
+					frontImgUrl,
+					backImgUrl,
 					parsedTags,
 					status?.toLowerCase() as ValidStatus
 				);

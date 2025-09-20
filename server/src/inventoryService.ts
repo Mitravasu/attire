@@ -14,8 +14,8 @@ export class InventoryService {
 	private static get insertStatement() {
 		if (!this._insertStatement) {
 			this._insertStatement = db.prepare(`
-				INSERT INTO inventory (title, imgUrl, tags, status, createdAt)
-				VALUES (?, ?, ?, ?, ?)
+				INSERT INTO inventory (title, frontImgUrl, backImgUrl, tags, status, createdAt)
+				VALUES (?, ?, ?, ?, ?, ?)
 			`);
 		}
 		return this._insertStatement;
@@ -24,7 +24,7 @@ export class InventoryService {
 	private static get selectAllStatement() {
 		if (!this._selectAllStatement) {
 			this._selectAllStatement = db.prepare(`
-				SELECT id, title, imgUrl, tags, status, createdAt, updatedAt
+				SELECT id, title, frontImgUrl, backImgUrl, tags, status, createdAt, updatedAt
 				FROM inventory
 				ORDER BY createdAt DESC
 			`);
@@ -35,7 +35,7 @@ export class InventoryService {
 	private static get selectByIdStatement() {
 		if (!this._selectByIdStatement) {
 			this._selectByIdStatement = db.prepare(`
-				SELECT id, title, imgUrl, tags, status, createdAt, updatedAt
+				SELECT id, title, frontImgUrl, backImgUrl, tags, status, createdAt, updatedAt
 				FROM inventory
 				WHERE id = ?
 			`);
@@ -69,7 +69,7 @@ export class InventoryService {
 		if (!this._updateItemStatement) {
 			this._updateItemStatement = db.prepare(`
 				UPDATE inventory
-				SET title = ?, imgUrl = ?, tags = ?, status = ?, updatedAt = ?
+				SET title = ?, frontImgUrl = ?, backImgUrl = ?, tags = ?, status = ?, updatedAt = ?
 				WHERE id = ?
 			`);
 		}
@@ -79,7 +79,8 @@ export class InventoryService {
 	// Create a new inventory item
 	static createItem(
 		title: string,
-		imgUrl: string,
+		frontImgUrl: string,
+		backImgUrl: string | null,
 		tags: string[],
 		status: ValidStatus
 	): InventoryItem {
@@ -89,7 +90,8 @@ export class InventoryService {
 
 			const result = this.insertStatement.run(
 				title,
-				imgUrl,
+				frontImgUrl,
+				backImgUrl,
 				tagsJson,
 				status,
 				createdAt
@@ -159,11 +161,12 @@ export class InventoryService {
 		}
 	}
 
-	// Update entire inventory item (except image URL if not provided)
+	// Update entire inventory item (except image URLs if not provided)
 	static updateItem(
 		id: number,
 		title?: string,
-		imgUrl?: string,
+		frontImgUrl?: string,
+		backImgUrl?: string | null,
 		tags?: string[],
 		status?: ValidStatus
 	): InventoryItem | null {
@@ -177,8 +180,12 @@ export class InventoryService {
 			// Use provided values or keep current ones
 			const updatedTitle =
 				title !== undefined ? title : currentItem.title;
-			const updatedImgUrl =
-				imgUrl !== undefined ? imgUrl : currentItem.imgUrl;
+			const updatedFrontImgUrl =
+				frontImgUrl !== undefined
+					? frontImgUrl
+					: currentItem.frontImgUrl;
+			const updatedBackImgUrl =
+				backImgUrl !== undefined ? backImgUrl : currentItem.backImgUrl;
 			const updatedTags = tags !== undefined ? tags : currentItem.tags;
 			const updatedStatus =
 				status !== undefined ? status : currentItem.status;
@@ -186,7 +193,8 @@ export class InventoryService {
 
 			const result = this.updateItemStatement.run(
 				updatedTitle,
-				updatedImgUrl,
+				updatedFrontImgUrl,
+				updatedBackImgUrl,
 				JSON.stringify(updatedTags),
 				updatedStatus,
 				updatedAt,
@@ -220,7 +228,8 @@ export class InventoryService {
 		return {
 			id: row.id,
 			title: row.title,
-			imgUrl: row.imgUrl,
+			frontImgUrl: row.frontImgUrl,
+			backImgUrl: row.backImgUrl || undefined, // Handle null/undefined back images
 			tags: JSON.parse(row.tags),
 			status: row.status as ValidStatus,
 			createdAt: row.createdAt,
@@ -245,7 +254,7 @@ export class InventoryService {
 	static getItemsByStatus(status: ValidStatus): InventoryItem[] {
 		try {
 			const statement = db.prepare(`
-				SELECT id, title, imgUrl, tags, status, createdAt, updatedAt
+				SELECT id, title, frontImgUrl, backImgUrl, tags, status, createdAt, updatedAt
 				FROM inventory
 				WHERE status = ?
 				ORDER BY createdAt DESC
