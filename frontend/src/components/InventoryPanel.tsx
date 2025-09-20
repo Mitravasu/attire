@@ -191,7 +191,7 @@ export default function InventoryPanel({ filters }: InventoryPanelProps) {
 				onItemDeleted={handleItemDeleted}
 			/>
 			<div className='flex flex-col h-full w-full border-2 border-white rounded-md backdrop-blur-md'>
-				<div className='flex flex-wrap justify-start p-4 flex-1 overflow-y-auto'>
+				<div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 p-4 flex-1 overflow-y-auto'>
 					{items.length === 0 ? (
 						<div className='w-full text-center text-gray-500 py-8'>
 							{totalItems === 0
