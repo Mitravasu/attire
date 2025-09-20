@@ -14,9 +14,9 @@ export default function InventoryCard({ item }: { item: InventoryItem }) {
 	return (
 		<div className='flex flex-col w-70 h-fit m-3'>
 			<img
-				src={item.imgUrl}
-				className='w-full border-secondary bg-primary h-80 overflow-hidden'></img>
-			<div className='flex flex-col w-full h-30 bg-primary pt-1'>
+				src={`${import.meta.env.VITE_API_URL}${item.imgUrl}`}
+				className='w-full border-secondary h-80 overflow-hidden'></img>
+			<div className='flex flex-col w-full h-30 pt-1'>
 				<div className='flex w-full justify-between'>
 					<p className='text-md'>{item.title.toUpperCase()}</p>
 					<button
