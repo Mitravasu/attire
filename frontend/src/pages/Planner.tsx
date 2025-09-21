@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { WeekDay, Outfit, DraggedOutfit, PlannerEntry } from '../types';
 import WeekView from '../components/WeekView';
 import OutfitSidebar from '../components/OutfitSidebar';
-import NavBar from '../components/NavBar';
 import {
 	getCurrentWeekDates,
 	getWeekDateRange,
@@ -172,7 +171,7 @@ export default function Planner() {
 	}
 
 	return (
-		<div className='flex flex-col h-screen bg-gray-900'>
+		<div className='flex flex-col h-full bg-gray-900'>
 			{/* Week Navigation */}
 			<div className='bg-gray-800 border-b border-gray-600 px-6 py-4'>
 				<div className='flex items-center justify-between'>
@@ -228,8 +227,8 @@ export default function Planner() {
 			</div>
 
 			{/* Main Content */}
-			<div className='flex-1 flex overflow-hidden'>
-				<div className='flex-1 p-4 overflow-hidden'>
+			<div className='flex-1 flex min-h-0'>
+				<div className='flex-1 p-6 flex flex-col min-h-0'>
 					<WeekView
 						weekDays={weekDays}
 						onDropOutfit={handleDropOutfit}

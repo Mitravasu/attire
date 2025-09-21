@@ -78,10 +78,10 @@ function DayColumn({
 	};
 
 	return (
-		<div className='flex-1 min-h-96'>
+		<div className='flex-1 h-full flex flex-col'>
 			{/* Day Header */}
 			<div
-				className={`p-4 text-center border-b border-gray-600 ${
+				className={`p-4 text-center border-b border-gray-600 flex-shrink-0 ${
 					day.isToday
 						? 'bg-blue-600 text-white'
 						: 'bg-gray-700 text-gray-200'
@@ -94,7 +94,7 @@ function DayColumn({
 
 			{/* Drop Zone */}
 			<div
-				className={`min-h-80 p-2 transition-colors duration-200 ${
+				className={`flex-1 p-2 transition-colors duration-200 overflow-y-auto ${
 					isDropZone
 						? 'bg-blue-500/20 border-2 border-dashed border-blue-400'
 						: 'bg-gray-800 border border-gray-600'
@@ -197,7 +197,7 @@ export default function WeekView({
 	isDragging,
 }: WeekViewProps) {
 	return (
-		<div className='flex-1 bg-gray-900 rounded-lg overflow-hidden'>
+		<div className='bg-gray-900 rounded-lg overflow-hidden flex-1 min-h-0'>
 			<div className='flex h-full'>
 				{weekDays.map((day) => (
 					<DayColumn
