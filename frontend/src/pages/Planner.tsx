@@ -161,7 +161,6 @@ export default function Planner() {
 	if (isLoading) {
 		return (
 			<div className='flex flex-col h-screen bg-gray-900'>
-				<NavBar />
 				<div className='flex-1 flex items-center justify-center'>
 					<div className='text-center'>
 						<div className='animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4'></div>
@@ -174,8 +173,6 @@ export default function Planner() {
 
 	return (
 		<div className='flex flex-col h-screen bg-gray-900'>
-			<NavBar />
-
 			{/* Week Navigation */}
 			<div className='bg-gray-800 border-b border-gray-600 px-6 py-4'>
 				<div className='flex items-center justify-between'>
