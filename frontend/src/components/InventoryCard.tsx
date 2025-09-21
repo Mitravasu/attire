@@ -101,7 +101,7 @@ export default function InventoryCard({
 
 	return (
 		<div ref={cardRef} className='flex flex-col w-70 h-fit m-3'>
-			<div className='relative w-full h-80 overflow-hidden border-secondary bg-gray-800'>
+			<div className='relative w-full h-80 overflow-hidden border-secondary bg-gray-800 group'>
 				{isInView ? (
 					<>
 						<img
@@ -138,11 +138,28 @@ export default function InventoryCard({
 				{item.backImgUrl && (
 					<button
 						onClick={() => setShowFrontImage(!showFrontImage)}
-						className='absolute top-2 right-2 bg-black bg-opacity-50 text-white p-2 rounded hover:bg-opacity-75 transition-all'
+						className='absolute top-10 left-2 bg-black bg-opacity-50 text-white w-8 h-8 rounded flex items-center justify-center hover:bg-opacity-75 transition-all'
 						title={`Switch to ${
 							showFrontImage ? 'back' : 'front'
 						} view`}>
-						<FontAwesomeIcon icon={faSync} />
+						<FontAwesomeIcon icon={faSync} className='text-xs' />
+					</button>
+				)}
+				{onAddToOutfit && (
+					<button
+						onClick={() => onAddToOutfit(item)}
+						disabled={isInCurrentOutfit}
+						className={`absolute top-2 right-2 w-8 h-8 rounded flex items-center justify-center transition-opacity ${
+							isInCurrentOutfit
+								? 'bg-gray-600 text-gray-400 cursor-not-allowed opacity-0 group-hover:opacity-100'
+								: 'bg-green-600 text-white hover:bg-green-700 opacity-0 group-hover:opacity-100'
+						}`}
+						title={
+							isInCurrentOutfit
+								? 'Already in outfit'
+								: 'Add to outfit'
+						}>
+						<FontAwesomeIcon icon={faPlus} />
 					</button>
 				)}
 			</div>
