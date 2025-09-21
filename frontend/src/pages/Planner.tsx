@@ -1,23 +1,258 @@
+import { useState, useEffect } from 'react';
+import { WeekDay, Outfit, DraggedOutfit, PlannerEntry } from '../types';
+import WeekView from '../components/WeekView';
+import OutfitSidebar from '../components/OutfitSidebar';
+import {
+	getCurrentWeekDates,
+	getWeekDateRange,
+	getNextWeek,
+	getPreviousWeek,
+	formatDateForDisplay,
+} from '../utils/dateUtils';
+import {
+	getPlannerEntries,
+	createPlannerEntry,
+	deletePlannerEntry,
+	getOutfits,
+} from '../utils/api';
+
 export default function Planner() {
-	return (
-		<div className='flex flex-col h-full w-full items-center justify-center space-y-4'>
-			<h1 className='text-4xl font-bold text-white'>Planner</h1>
-			<div className='text-center text-gray-300'>
-				<p className='text-xl mb-4'>Plan your outfits for the week</p>
-				<p className='text-md'>This feature is coming soon! 📅</p>
-				<div className='mt-8 p-6 bg-gray-700 rounded-lg max-w-lg'>
-					<h3 className='text-lg font-semibold mb-3'>
-						Planned Features:
-					</h3>
-					<ul className='text-left space-y-2'>
-						<li>• Weekly outfit calendar</li>
-						<li>• Weather-based suggestions</li>
-						<li>• Event-specific outfit planning</li>
-						<li>• Laundry schedule integration</li>
-						<li>• Outfit history tracking</li>
-					</ul>
+	const [weekDays, setWeekDays] = useState<WeekDay[]>(getCurrentWeekDates());
+	const [outfits, setOutfits] = useState<Outfit[]>([]);
+	const [totalOutfits, setTotalOutfits] = useState(0);
+	const [currentPage, setCurrentPage] = useState(1);
+	const [isDragging, setIsDragging] = useState(false);
+	const [isLoading, setIsLoading] = useState(true);
+	const [isOutfitsLoading, setIsOutfitsLoading] = useState(false);
+
+	const itemsPerPage = 10;
+
+	// Load planner entries for the current week
+	const loadPlannerEntries = async () => {
+		try {
+			const { startDate, endDate } = getWeekDateRange(weekDays);
+			const entries = await getPlannerEntries(startDate, endDate);
+
+			// Group entries by date
+			const entriesByDate: Record<
+				string,
+				(PlannerEntry & { outfit: Outfit })[]
+			> = {};
+			entries.forEach((entry) => {
+				if (!entriesByDate[entry.date]) {
+					entriesByDate[entry.date] = [];
+				}
+				entriesByDate[entry.date].push(entry);
+			});
+
+			// Update week days with outfits
+			setWeekDays((prev) =>
+				prev.map((day) => ({
+					...day,
+					outfits:
+						entriesByDate[day.date]?.map((entry) => ({
+							...entry.outfit,
+							notes: entry.notes,
+							entryId: entry.id, // Add entry ID for removal
+						})) || [],
+				}))
+			);
+		} catch (error) {
+			console.error('Error loading planner entries:', error);
+		}
+	};
+
+	// Load available outfits
+	const loadOutfits = async (page: number = 1) => {
+		try {
+			setIsOutfitsLoading(true);
+			const result = await getOutfits(page, itemsPerPage);
+			setOutfits(result.outfits);
+			setTotalOutfits(result.total);
+		} catch (error) {
+			console.error('Error loading outfits:', error);
+		} finally {
+			setIsOutfitsLoading(false);
+		}
+	};
+
+	// Initial load
+	useEffect(() => {
+		const loadInitialData = async () => {
+			setIsLoading(true);
+			await Promise.all([loadPlannerEntries(), loadOutfits(1)]);
+			setIsLoading(false);
+		};
+
+		loadInitialData();
+	}, []);
+
+	// Reload planner entries when week changes
+	useEffect(() => {
+		if (!isLoading) {
+			loadPlannerEntries();
+		}
+	}, [weekDays[0].date]); // Trigger when the first day of the week changes
+
+	// Handle outfit drop on a day
+	const handleDropOutfit = async (
+		date: string,
+		outfit: Outfit,
+		notes?: string
+	) => {
+		try {
+			await createPlannerEntry(date, outfit.id, notes);
+			await loadPlannerEntries(); // Reload to get the latest data
+		} catch (error) {
+			console.error('Error creating planner entry:', error);
+			alert(
+				'Failed to add outfit to the day. It might already be planned for this day.'
+			);
+		}
+	};
+
+	// Handle outfit removal
+	const handleRemoveOutfit = async (entryId: number) => {
+		try {
+			await deletePlannerEntry(entryId);
+			await loadPlannerEntries(); // Reload to get the latest data
+		} catch (error) {
+			console.error('Error removing planner entry:', error);
+			alert('Failed to remove outfit from the day.');
+		}
+	};
+
+	// Handle drag start
+	const handleDragStart = (_dragData: DraggedOutfit) => {
+		setIsDragging(true);
+	};
+
+	// Week navigation
+	const handlePreviousWeek = () => {
+		setWeekDays(getPreviousWeek(weekDays));
+	};
+
+	const handleNextWeek = () => {
+		setWeekDays(getNextWeek(weekDays));
+	};
+
+	const handleToday = () => {
+		setWeekDays(getCurrentWeekDates());
+	};
+
+	// Page change for outfits
+	const handlePageChange = (page: number) => {
+		setCurrentPage(page);
+		loadOutfits(page);
+	};
+
+	// Add drag end listener
+	useEffect(() => {
+		const handleGlobalDragEnd = () => {
+			setIsDragging(false);
+		};
+
+		document.addEventListener('dragend', handleGlobalDragEnd);
+		return () =>
+			document.removeEventListener('dragend', handleGlobalDragEnd);
+	}, []);
+
+	if (isLoading) {
+		return (
+			<div className='flex flex-col h-screen bg-gray-900'>
+				<div className='flex-1 flex items-center justify-center'>
+					<div className='text-center'>
+						<div className='animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4'></div>
+						<p className='text-white text-lg'>Loading planner...</p>
+					</div>
 				</div>
 			</div>
+		);
+	}
+
+	return (
+		<div className='flex flex-col h-full bg-gray-900'>
+			{/* Week Navigation */}
+			<div className='bg-gray-800 border-b border-gray-600 px-6 py-4'>
+				<div className='flex items-center justify-between'>
+					<div className='flex items-center space-x-4'>
+						<button
+							onClick={handlePreviousWeek}
+							className='p-2 text-gray-400 hover:text-white transition-colors rounded-lg hover:bg-gray-700'
+							title='Previous week'>
+							<svg
+								className='w-5 h-5'
+								fill='none'
+								stroke='currentColor'
+								viewBox='0 0 24 24'>
+								<path
+									strokeLinecap='round'
+									strokeLinejoin='round'
+									strokeWidth={2}
+									d='M15 19l-7-7 7-7'
+								/>
+							</svg>
+						</button>
+
+						<h1 className='text-white text-xl font-semibold'>
+							{formatDateForDisplay(weekDays[0].date)} -{' '}
+							{formatDateForDisplay(weekDays[6].date)}
+						</h1>
+
+						<button
+							onClick={handleNextWeek}
+							className='p-2 text-gray-400 hover:text-white transition-colors rounded-lg hover:bg-gray-700'
+							title='Next week'>
+							<svg
+								className='w-5 h-5'
+								fill='none'
+								stroke='currentColor'
+								viewBox='0 0 24 24'>
+								<path
+									strokeLinecap='round'
+									strokeLinejoin='round'
+									strokeWidth={2}
+									d='M9 5l7 7-7 7'
+								/>
+							</svg>
+						</button>
+					</div>
+
+					<button
+						onClick={handleToday}
+						className='px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors text-sm font-medium'>
+						Today
+					</button>
+				</div>
+			</div>
+
+			{/* Main Content */}
+			<div className='flex-1 flex min-h-0'>
+				<div className='flex-1 p-6 flex flex-col min-h-0'>
+					<WeekView
+						weekDays={weekDays}
+						onDropOutfit={handleDropOutfit}
+						onRemoveOutfit={handleRemoveOutfit}
+						onDragStart={handleDragStart}
+						isDragging={isDragging}
+					/>
+				</div>
+
+				<OutfitSidebar
+					outfits={outfits}
+					totalCount={totalOutfits}
+					currentPage={currentPage}
+					itemsPerPage={itemsPerPage}
+					onPageChange={handlePageChange}
+					onDragStart={handleDragStart}
+					isLoading={isOutfitsLoading}
+				/>
+			</div>
+
+			{/* Drag overlay */}
+			{isDragging && (
+				<div className='fixed inset-0 pointer-events-none z-50 bg-black/20' />
+			)}
 		</div>
 	);
 }

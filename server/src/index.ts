@@ -14,10 +14,14 @@ import {
 	ValidStatus,
 	CreateOutfitRequest,
 	UpdateOutfitRequest,
+	CreatePlannerEntryRequest,
+	UpdatePlannerEntryRequest,
+	GetPlannerEntriesRequest,
 } from './types';
-import { initializeDatabase } from './database';
+import { initializeDatabase, db } from './database';
 import { InventoryService } from './inventoryService';
 import { OutfitService } from './outfitService';
+import { PlannerService } from './plannerService';
 
 const app: Application = express();
 const PORT: number = parseInt(process.env.PORT || '3001', 10);
@@ -723,6 +727,151 @@ app.delete('/api/outfits/:id', (req: Request, res: Response) => {
 	}
 });
 
+// ===== PLANNER ENDPOINTS =====
+
+// Get planner entries for a date range
+app.get('/api/planner', (req: GetPlannerEntriesRequest, res: Response) => {
+	try {
+		const { startDate, endDate } = req.query;
+
+		if (!startDate || !endDate) {
+			res.status(400).json({
+				error: 'Both startDate and endDate query parameters are required',
+			});
+			return;
+		}
+
+		const entries = PlannerService.getEntriesWithOutfitsForDateRange(
+			startDate,
+			endDate
+		);
+		res.json(entries);
+	} catch (error) {
+		console.error('Error fetching planner entries:', error);
+		res.status(500).json({
+			error: 'Internal server error while fetching planner entries',
+		});
+	}
+});
+
+// Create a new planner entry
+app.post('/api/planner', (req: CreatePlannerEntryRequest, res: Response) => {
+	try {
+		const { date, outfitId, notes } = req.body;
+
+		if (!date || !outfitId) {
+			res.status(400).json({
+				error: 'Date and outfitId are required',
+			});
+			return;
+		}
+
+		// Validate date format (YYYY-MM-DD)
+		const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+		if (!dateRegex.test(date)) {
+			res.status(400).json({
+				error: 'Date must be in YYYY-MM-DD format',
+			});
+			return;
+		}
+
+		// Validate outfitId is a number
+		if (typeof outfitId !== 'number' || isNaN(outfitId)) {
+			res.status(400).json({
+				error: 'OutfitId must be a valid number',
+			});
+			return;
+		}
+
+		const entry = PlannerService.createEntry(date, outfitId, notes);
+		res.status(201).json(entry);
+	} catch (error: any) {
+		console.error('Error creating planner entry:', error);
+
+		if (error.message?.includes('already exists')) {
+			res.status(409).json({ error: error.message });
+			return;
+		}
+
+		res.status(500).json({
+			error: 'Internal server error while creating planner entry',
+		});
+	}
+});
+
+// Update a planner entry
+app.put('/api/planner/:id', (req: UpdatePlannerEntryRequest, res: Response) => {
+	try {
+		const id = parseInt(req.params.id, 10);
+		if (isNaN(id)) {
+			res.status(400).json({ error: 'Invalid planner entry ID' });
+			return;
+		}
+
+		const { date, outfitId, notes } = req.body;
+
+		// Validate date format if provided
+		if (date) {
+			const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+			if (!dateRegex.test(date)) {
+				res.status(400).json({
+					error: 'Date must be in YYYY-MM-DD format',
+				});
+				return;
+			}
+		}
+
+		// Validate outfitId if provided
+		if (
+			outfitId !== undefined &&
+			(typeof outfitId !== 'number' || isNaN(outfitId))
+		) {
+			res.status(400).json({
+				error: 'OutfitId must be a valid number',
+			});
+			return;
+		}
+
+		const entry = PlannerService.updateEntry(id, { date, outfitId, notes });
+		res.json(entry);
+	} catch (error: any) {
+		console.error('Error updating planner entry:', error);
+
+		if (error.message === 'Planner entry not found') {
+			res.status(404).json({ error: error.message });
+			return;
+		}
+
+		res.status(500).json({
+			error: 'Internal server error while updating planner entry',
+		});
+	}
+});
+
+// Delete a planner entry
+app.delete('/api/planner/:id', (req: Request, res: Response) => {
+	try {
+		const id = parseInt(req.params.id, 10);
+		if (isNaN(id)) {
+			res.status(400).json({ error: 'Invalid planner entry ID' });
+			return;
+		}
+
+		const deleted = PlannerService.deleteEntry(id);
+		if (!deleted) {
+			res.status(404).json({ error: 'Planner entry not found' });
+			return;
+		}
+
+		res.json({ message: 'Planner entry deleted successfully' });
+	} catch (error) {
+		console.error('Error deleting planner entry:', error);
+		res.status(500).json({
+			error: 'Internal server error while deleting planner entry',
+		});
+	}
+});
+
 // Error handling middleware
 app.use(
 	(
@@ -763,6 +912,10 @@ app.listen(PORT, () => {
 	console.log(`  POST   /api/outfits       - Create new outfit`);
 	console.log(`  PUT    /api/outfits/:id   - Update outfit`);
 	console.log(`  DELETE /api/outfits/:id   - Delete outfit`);
+	console.log(`  GET    /api/planner       - Get planner entries`);
+	console.log(`  POST   /api/planner       - Create planner entry`);
+	console.log(`  PUT    /api/planner/:id   - Update planner entry`);
+	console.log(`  DELETE /api/planner/:id   - Delete planner entry`);
 });
 
 export default app;
