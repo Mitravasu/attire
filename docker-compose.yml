@@ -1,0 +1,86 @@
+version: '3.8'
+
+services:
+  # Frontend service
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      target: production
+      args:
+        - VITE_API_URL=http://localhost:3001
+    ports:
+      - "3000:80"
+    depends_on:
+      - server
+    networks:
+      - attire-network
+
+  # Backend server service
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+      target: production
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=production
+      - PORT=3001
+    volumes:
+      # Mount persistent volume for database
+      - attire-data:/app/data
+      # Mount uploads directory for user uploaded images
+      - attire-uploads:/app/uploads
+    networks:
+      - attire-network
+
+  # Development override - uncomment for development
+  # frontend-dev:
+  #   build:
+  #     context: ./frontend
+  #     dockerfile: Dockerfile
+  #     target: development
+  #   ports:
+  #     - "5173:5173"
+  #   volumes:
+  #     - ./frontend:/app
+  #     - /app/node_modules
+  #   environment:
+  #     - VITE_API_URL=http://localhost:3001
+  #   depends_on:
+  #     - server-dev
+  #   networks:
+  #     - attire-network
+
+  # server-dev:
+  #   build:
+  #     context: ./server
+  #     dockerfile: Dockerfile
+  #     target: development
+  #   ports:
+  #     - "3001:3001"
+  #   volumes:
+  #     - ./server:/app
+  #     - /app/node_modules
+  #     - attire-data:/app/data
+  #     - attire-uploads:/app/uploads
+  #   environment:
+  #     - NODE_ENV=development
+  #     - PORT=3001
+  #   networks:
+  #     - attire-network
+
+# Persistent volumes
+volumes:
+  # Volume for SQLite database persistence
+  attire-data:
+    driver: local
+  # Volume for uploaded images
+  attire-uploads:
+    driver: local
+
+# Network for service communication
+networks:
+  attire-network:
+    driver: bridge
