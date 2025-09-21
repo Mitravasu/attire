@@ -15,9 +15,15 @@ interface InventoryPanelProps {
 		type: string;
 		isFavorite: string;
 	};
+	onAddToOutfit?: (item: InventoryItem) => void;
+	currentOutfitItemIds?: number[];
 }
 
-export default function InventoryPanel({ filters }: InventoryPanelProps) {
+export default function InventoryPanel({
+	filters,
+	onAddToOutfit,
+	currentOutfitItemIds = [],
+}: InventoryPanelProps) {
 	const [items, setItems] = useState<InventoryItem[]>([]);
 	const [isEditFormVisible, setIsEditFormVisible] = useState(false);
 	const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
@@ -200,12 +206,16 @@ export default function InventoryPanel({ filters }: InventoryPanelProps) {
 						</div>
 					) : (
 						items.map((item) => {
+							const isInCurrentOutfit =
+								currentOutfitItemIds.includes(item.id);
 							return (
 								<InventoryCard
 									key={item.id}
 									item={item}
 									onEdit={handleEditItem}
 									onDelete={handleDeleteItem}
+									onAddToOutfit={onAddToOutfit}
+									isInCurrentOutfit={isInCurrentOutfit}
 								/>
 							);
 						})

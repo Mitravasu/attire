@@ -4,6 +4,7 @@ import {
 	faEdit,
 	faTrash,
 	faSync,
+	faPlus,
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useState, useEffect, useRef } from 'react';
@@ -13,12 +14,16 @@ interface InventoryCardProps {
 	item: InventoryItem;
 	onEdit: (item: InventoryItem) => void;
 	onDelete: (item: InventoryItem) => void;
+	onAddToOutfit?: (item: InventoryItem) => void;
+	isInCurrentOutfit?: boolean;
 }
 
 export default function InventoryCard({
 	item,
 	onEdit,
 	onDelete,
+	onAddToOutfit,
+	isInCurrentOutfit = false,
 }: InventoryCardProps) {
 	const tagsDisplay = item.tags.map((tag) => {
 		return <p className='text-accent text-sm'>{`#${tag.toUpperCase()}`}</p>;
@@ -145,6 +150,23 @@ export default function InventoryCard({
 				<div className='flex w-full justify-between items-center'>
 					<p className='text-md'>{item.title.toUpperCase()}</p>
 					<div className='flex space-x-2'>
+						{onAddToOutfit && (
+							<button
+								className={`cursor-pointer transition-colors ${
+									isInCurrentOutfit
+										? 'text-green-500 hover:text-green-400'
+										: 'hover:text-green-500'
+								}`}
+								onClick={() => onAddToOutfit(item)}
+								disabled={isInCurrentOutfit}
+								title={
+									isInCurrentOutfit
+										? 'Already in outfit'
+										: 'Add to outfit'
+								}>
+								<FontAwesomeIcon icon={faPlus} />
+							</button>
+						)}
 						<button
 							className='cursor-pointer hover:text-blue-500 transition-colors'
 							onClick={() => onEdit(item)}

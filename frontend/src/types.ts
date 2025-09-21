@@ -11,3 +11,16 @@ export type InventoryItem = {
 	createdAt: string;
 	updatedAt?: string;
 };
+
+export type Outfit = {
+	id: number;
+	name: string;
+	items: InventoryItem[];
+	createdAt: string;
+	updatedAt?: string;
+};
+
+export type CurrentOutfit = {
+	name: string;
+	items: InventoryItem[];
+};

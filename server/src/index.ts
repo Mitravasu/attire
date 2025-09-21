@@ -12,9 +12,12 @@ import {
 	DeleteRequest,
 	MulterError,
 	ValidStatus,
+	CreateOutfitRequest,
+	UpdateOutfitRequest,
 } from './types';
 import { initializeDatabase } from './database';
 import { InventoryService } from './inventoryService';
+import { OutfitService } from './outfitService';
 
 const app: Application = express();
 const PORT: number = parseInt(process.env.PORT || '3001', 10);
@@ -549,6 +552,177 @@ app.patch(
 	}
 );
 
+// OUTFIT ENDPOINTS
+
+// Get all outfits
+app.get('/api/outfits', (req: Request, res: Response) => {
+	try {
+		const outfits = OutfitService.getAllOutfits();
+		res.json(outfits);
+	} catch (error) {
+		console.error('Error fetching outfits:', error);
+		res.status(500).json({
+			error: 'Internal server error while fetching outfits',
+		});
+	}
+});
+
+// Get a specific outfit by ID
+app.get('/api/outfits/:id', (req: Request, res: Response) => {
+	try {
+		const id = parseInt(req.params.id, 10);
+		if (isNaN(id)) {
+			res.status(400).json({ error: 'Invalid outfit ID' });
+			return;
+		}
+
+		const outfit = OutfitService.getOutfitById(id);
+		if (!outfit) {
+			res.status(404).json({ error: 'Outfit not found' });
+			return;
+		}
+
+		res.json(outfit);
+	} catch (error) {
+		console.error('Error fetching outfit:', error);
+		res.status(500).json({
+			error: 'Internal server error while fetching outfit',
+		});
+	}
+});
+
+// Create a new outfit
+app.post('/api/outfits', (req: CreateOutfitRequest, res: Response) => {
+	try {
+		const { name, itemIds } = req.body;
+
+		// Validate input
+		if (!name || typeof name !== 'string' || name.trim() === '') {
+			res.status(400).json({
+				error: 'Outfit name is required and must be a non-empty string',
+			});
+			return;
+		}
+
+		if (!Array.isArray(itemIds)) {
+			res.status(400).json({
+				error: 'Item IDs must be provided as an array',
+			});
+			return;
+		}
+
+		// Validate that all itemIds are numbers
+		const validItemIds = itemIds.every(
+			(id) => typeof id === 'number' && id > 0
+		);
+		if (!validItemIds) {
+			res.status(400).json({
+				error: 'All item IDs must be positive numbers',
+			});
+			return;
+		}
+
+		const outfit = OutfitService.createOutfit(name.trim(), itemIds);
+		res.status(201).json({
+			message: 'Outfit created successfully',
+			outfit,
+		});
+	} catch (error) {
+		console.error('Error creating outfit:', error);
+		res.status(500).json({
+			error: 'Internal server error while creating outfit',
+		});
+	}
+});
+
+// Update an existing outfit
+app.put('/api/outfits/:id', (req: UpdateOutfitRequest, res: Response) => {
+	try {
+		const id = parseInt(req.params.id, 10);
+		if (isNaN(id)) {
+			res.status(400).json({ error: 'Invalid outfit ID' });
+			return;
+		}
+
+		const { name, itemIds } = req.body;
+
+		// Validate input
+		if (
+			name !== undefined &&
+			(typeof name !== 'string' || name.trim() === '')
+		) {
+			res.status(400).json({
+				error: 'Outfit name must be a non-empty string if provided',
+			});
+			return;
+		}
+
+		if (itemIds !== undefined) {
+			if (!Array.isArray(itemIds)) {
+				res.status(400).json({
+					error: 'Item IDs must be provided as an array if provided',
+				});
+				return;
+			}
+
+			const validItemIds = itemIds.every(
+				(id) => typeof id === 'number' && id > 0
+			);
+			if (!validItemIds) {
+				res.status(400).json({
+					error: 'All item IDs must be positive numbers',
+				});
+				return;
+			}
+		}
+
+		const outfit = OutfitService.updateOutfit(
+			id,
+			name ? name.trim() : undefined,
+			itemIds
+		);
+
+		if (!outfit) {
+			res.status(404).json({ error: 'Outfit not found' });
+			return;
+		}
+
+		res.json({
+			message: 'Outfit updated successfully',
+			outfit,
+		});
+	} catch (error) {
+		console.error('Error updating outfit:', error);
+		res.status(500).json({
+			error: 'Internal server error while updating outfit',
+		});
+	}
+});
+
+// Delete an outfit
+app.delete('/api/outfits/:id', (req: Request, res: Response) => {
+	try {
+		const id = parseInt(req.params.id, 10);
+		if (isNaN(id)) {
+			res.status(400).json({ error: 'Invalid outfit ID' });
+			return;
+		}
+
+		const deleted = OutfitService.deleteOutfit(id);
+		if (!deleted) {
+			res.status(404).json({ error: 'Outfit not found' });
+			return;
+		}
+
+		res.json({ message: 'Outfit deleted successfully' });
+	} catch (error) {
+		console.error('Error deleting outfit:', error);
+		res.status(500).json({
+			error: 'Internal server error while deleting outfit',
+		});
+	}
+});
+
 // Error handling middleware
 app.use(
 	(
@@ -584,6 +758,11 @@ app.listen(PORT, () => {
 	console.log(
 		`  PATCH  /api/inventory/:id/favorite - Update item favorite status`
 	);
+	console.log(`  GET    /api/outfits       - Get all outfits`);
+	console.log(`  GET    /api/outfits/:id   - Get specific outfit`);
+	console.log(`  POST   /api/outfits       - Create new outfit`);
+	console.log(`  PUT    /api/outfits/:id   - Update outfit`);
+	console.log(`  DELETE /api/outfits/:id   - Delete outfit`);
 });
 
 export default app;
