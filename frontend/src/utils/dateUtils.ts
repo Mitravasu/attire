@@ -20,11 +20,16 @@ export function getCurrentWeekDates(date: Date = new Date()): WeekDay[] {
 		'Sunday',
 	];
 
+	// Get the actual current date (not the reference date) for today comparison
+	const actualToday = new Date();
+	const actualTodayString = actualToday.toDateString();
+
 	for (let i = 0; i < 7; i++) {
 		const currentDate = new Date(monday);
 		currentDate.setDate(monday.getDate() + i);
 
-		const isToday = currentDate.toDateString() === today.toDateString();
+		// Only mark as today if this is actually today's date
+		const isToday = currentDate.toDateString() === actualTodayString;
 
 		weekDays.push({
 			date: currentDate.toISOString().split('T')[0], // YYYY-MM-DD format
@@ -49,7 +54,9 @@ export function getWeekDateRange(weekDays: WeekDay[]): {
 }
 
 export function formatDateForDisplay(date: string): string {
-	const dateObj = new Date(date);
+	// Parse the date string as local date to avoid timezone issues
+	const [year, month, day] = date.split('-').map(Number);
+	const dateObj = new Date(year, month - 1, day);
 	return dateObj.toLocaleDateString('en-US', {
 		month: 'short',
 		day: 'numeric',
@@ -57,13 +64,17 @@ export function formatDateForDisplay(date: string): string {
 }
 
 export function getNextWeek(currentWeekDays: WeekDay[]): WeekDay[] {
-	const firstDay = new Date(currentWeekDays[0].date);
+	// Parse the date string as local date to avoid timezone issues
+	const [year, month, day] = currentWeekDays[0].date.split('-').map(Number);
+	const firstDay = new Date(year, month - 1, day);
 	firstDay.setDate(firstDay.getDate() + 7);
 	return getCurrentWeekDates(firstDay);
 }
 
 export function getPreviousWeek(currentWeekDays: WeekDay[]): WeekDay[] {
-	const firstDay = new Date(currentWeekDays[0].date);
+	// Parse the date string as local date to avoid timezone issues
+	const [year, month, day] = currentWeekDays[0].date.split('-').map(Number);
+	const firstDay = new Date(year, month - 1, day);
 	firstDay.setDate(firstDay.getDate() - 7);
 	return getCurrentWeekDates(firstDay);
 }
