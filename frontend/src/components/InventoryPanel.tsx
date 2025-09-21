@@ -15,9 +15,15 @@ interface InventoryPanelProps {
 		type: string;
 		isFavorite: string;
 	};
+	onAddToOutfit?: (item: InventoryItem) => void;
+	currentOutfitItemIds?: number[];
 }
 
-export default function InventoryPanel({ filters }: InventoryPanelProps) {
+export default function InventoryPanel({
+	filters,
+	onAddToOutfit,
+	currentOutfitItemIds = [],
+}: InventoryPanelProps) {
 	const [items, setItems] = useState<InventoryItem[]>([]);
 	const [isEditFormVisible, setIsEditFormVisible] = useState(false);
 	const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
@@ -190,7 +196,7 @@ export default function InventoryPanel({ filters }: InventoryPanelProps) {
 				item={selectedItem}
 				onItemDeleted={handleItemDeleted}
 			/>
-			<div className='flex flex-col h-full w-full border-2 border-white rounded-md backdrop-blur-md'>
+			<div className='flex flex-col w-full h-full border-2 border-white rounded-md backdrop-blur-md'>
 				<div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 p-4 flex-1 overflow-y-auto'>
 					{items.length === 0 ? (
 						<div className='w-full text-center text-gray-500 py-8'>
@@ -200,12 +206,16 @@ export default function InventoryPanel({ filters }: InventoryPanelProps) {
 						</div>
 					) : (
 						items.map((item) => {
+							const isInCurrentOutfit =
+								currentOutfitItemIds.includes(item.id);
 							return (
 								<InventoryCard
 									key={item.id}
 									item={item}
 									onEdit={handleEditItem}
 									onDelete={handleDeleteItem}
+									onAddToOutfit={onAddToOutfit}
+									isInCurrentOutfit={isInCurrentOutfit}
 								/>
 							);
 						})

@@ -27,3 +27,4 @@ attire.db-journal
 frontend/.env
 server/uploads
 server/data
+.playwright-mcp

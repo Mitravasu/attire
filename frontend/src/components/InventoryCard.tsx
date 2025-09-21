@@ -4,6 +4,7 @@ import {
 	faEdit,
 	faTrash,
 	faSync,
+	faPlus,
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useState, useEffect, useRef } from 'react';
@@ -13,12 +14,16 @@ interface InventoryCardProps {
 	item: InventoryItem;
 	onEdit: (item: InventoryItem) => void;
 	onDelete: (item: InventoryItem) => void;
+	onAddToOutfit?: (item: InventoryItem) => void;
+	isInCurrentOutfit?: boolean;
 }
 
 export default function InventoryCard({
 	item,
 	onEdit,
 	onDelete,
+	onAddToOutfit,
+	isInCurrentOutfit = false,
 }: InventoryCardProps) {
 	const tagsDisplay = item.tags.map((tag) => {
 		return <p className='text-accent text-sm'>{`#${tag.toUpperCase()}`}</p>;
@@ -96,7 +101,7 @@ export default function InventoryCard({
 
 	return (
 		<div ref={cardRef} className='flex flex-col w-70 h-fit m-3'>
-			<div className='relative w-full h-80 overflow-hidden border-secondary bg-gray-800'>
+			<div className='relative w-full h-80 overflow-hidden border-secondary bg-gray-800 group'>
 				{isInView ? (
 					<>
 						<img
@@ -133,11 +138,28 @@ export default function InventoryCard({
 				{item.backImgUrl && (
 					<button
 						onClick={() => setShowFrontImage(!showFrontImage)}
-						className='absolute top-2 right-2 bg-black bg-opacity-50 text-white p-2 rounded hover:bg-opacity-75 transition-all'
+						className='absolute top-10 left-2 bg-black bg-opacity-50 text-white w-8 h-8 rounded flex items-center justify-center hover:bg-opacity-75 transition-all'
 						title={`Switch to ${
 							showFrontImage ? 'back' : 'front'
 						} view`}>
-						<FontAwesomeIcon icon={faSync} />
+						<FontAwesomeIcon icon={faSync} className='text-xs' />
+					</button>
+				)}
+				{onAddToOutfit && (
+					<button
+						onClick={() => onAddToOutfit(item)}
+						disabled={isInCurrentOutfit}
+						className={`absolute top-2 right-2 w-8 h-8 rounded flex items-center justify-center transition-opacity ${
+							isInCurrentOutfit
+								? 'bg-gray-600 text-gray-400 cursor-not-allowed opacity-0 group-hover:opacity-100'
+								: 'bg-green-600 text-white hover:bg-green-700 opacity-0 group-hover:opacity-100'
+						}`}
+						title={
+							isInCurrentOutfit
+								? 'Already in outfit'
+								: 'Add to outfit'
+						}>
+						<FontAwesomeIcon icon={faPlus} />
 					</button>
 				)}
 			</div>
@@ -145,6 +167,23 @@ export default function InventoryCard({
 				<div className='flex w-full justify-between items-center'>
 					<p className='text-md'>{item.title.toUpperCase()}</p>
 					<div className='flex space-x-2'>
+						{onAddToOutfit && (
+							<button
+								className={`cursor-pointer transition-colors ${
+									isInCurrentOutfit
+										? 'text-green-500 hover:text-green-400'
+										: 'hover:text-green-500'
+								}`}
+								onClick={() => onAddToOutfit(item)}
+								disabled={isInCurrentOutfit}
+								title={
+									isInCurrentOutfit
+										? 'Already in outfit'
+										: 'Add to outfit'
+								}>
+								<FontAwesomeIcon icon={faPlus} />
+							</button>
+						)}
 						<button
 							className='cursor-pointer hover:text-blue-500 transition-colors'
 							onClick={() => onEdit(item)}

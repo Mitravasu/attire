@@ -58,3 +58,28 @@ export interface MulterError extends Error {
 }
 
 export type ValidStatus = 'dirty' | 'washed' | 'ironed';
+
+export interface Outfit {
+	id: number;
+	name: string;
+	items: InventoryItem[];
+	createdAt: string;
+	updatedAt?: string;
+}
+
+export interface CreateOutfitRequest extends Request {
+	body: {
+		name: string;
+		itemIds: number[];
+	};
+}
+
+export interface UpdateOutfitRequest extends Request {
+	params: {
+		id: string;
+	};
+	body: {
+		name?: string;
+		itemIds?: number[];
+	};
+}

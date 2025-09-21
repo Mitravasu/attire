@@ -6,6 +6,7 @@ import { migrateBackImgUrlOptional } from './migrate-back-img-optional';
 import { migrateAddColorType } from './migrate-add-color-type';
 import { migrateAddFavorites } from './migrate-add-favorites';
 import { migrateAddIndexes } from './migrate-add-indexes';
+import { migrateAddOutfits } from './migrate-add-outfits';
 
 // Database setup
 const dbDir = path.join(__dirname, '..', 'data');
@@ -57,6 +58,9 @@ export const initializeDatabase = (): void => {
 
 		// Add database indexes for performance
 		migrateAddIndexes();
+
+		// Add outfit tables
+		migrateAddOutfits();
 
 		console.log('Database tables initialized successfully');
 	} catch (error) {
