@@ -6,6 +6,8 @@ import {
 	faCheck,
 	faPlus,
 	faMinus,
+	faChevronLeft,
+	faChevronRight,
 } from '@fortawesome/free-solid-svg-icons';
 
 interface EditOutfitModalProps {
@@ -27,6 +29,8 @@ export default function EditOutfitModal({
 	const [isLoading, setIsLoading] = useState(false);
 	const [isSaving, setIsSaving] = useState(false);
 	const [error, setError] = useState<string | null>(null);
+	const [currentPage, setCurrentPage] = useState(1);
+	const itemsPerPage = 12; // Show 12 items per page
 
 	// Initialize form when outfit changes
 	useEffect(() => {
@@ -37,11 +41,33 @@ export default function EditOutfitModal({
 		}
 	}, [outfit]);
 
+	// Reset pagination when available items change
+	useEffect(() => {
+		setCurrentPage(1);
+	}, [availableItems]);
+
+	// Calculate pagination values
+	const filteredAvailableItems = availableItems.filter(
+		(item) => !selectedItems.some((selected) => selected.id === item.id)
+	);
+	const totalPages = Math.ceil(filteredAvailableItems.length / itemsPerPage);
+	const startIndex = (currentPage - 1) * itemsPerPage;
+	const endIndex = startIndex + itemsPerPage;
+	const currentPageItems = filteredAvailableItems.slice(startIndex, endIndex);
+
+	const handlePreviousPage = () => {
+		setCurrentPage((prev) => Math.max(1, prev - 1));
+	};
+
+	const handleNextPage = () => {
+		setCurrentPage((prev) => Math.min(totalPages, prev + 1));
+	};
+
 	const fetchAvailableItems = async () => {
 		setIsLoading(true);
 		try {
 			const response = await fetch(
-				`${import.meta.env.VITE_API_URL}/api/inventory`
+				`${import.meta.env.VITE_API_URL}/api/inventory?limit=100`
 			);
 			const result = await response.json();
 
@@ -158,59 +184,108 @@ export default function EditOutfitModal({
 					<div className='h-full grid grid-cols-1 lg:grid-cols-2 gap-6'>
 						{/* Available Items */}
 						<div className='flex flex-col min-h-0'>
-							<h3 className='text-lg font-medium text-white mb-3 flex-shrink-0'>
-								Available Items
-							</h3>
+							<div className='flex items-center justify-between mb-4 flex-shrink-0'>
+								<h3 className='text-lg font-medium text-white'>
+									Available Items
+								</h3>
+								{!isLoading &&
+									filteredAvailableItems.length > 0 && (
+										<div className='flex items-center gap-3'>
+											<span className='text-sm text-gray-400'>
+												{startIndex + 1}-
+												{Math.min(
+													endIndex,
+													filteredAvailableItems.length
+												)}{' '}
+												of{' '}
+												{filteredAvailableItems.length}
+											</span>
+											<div className='flex items-center gap-1'>
+												<button
+													onClick={handlePreviousPage}
+													disabled={currentPage === 1}
+													className={`w-8 h-8 rounded-md flex items-center justify-center text-sm transition-colors ${
+														currentPage === 1
+															? 'bg-gray-700 text-gray-500 cursor-not-allowed'
+															: 'bg-gray-700 text-white hover:bg-gray-600'
+													}`}
+													title='Previous page'>
+													<FontAwesomeIcon
+														icon={faChevronLeft}
+													/>
+												</button>
+												<span className='text-sm text-gray-300 px-2'>
+													{currentPage} / {totalPages}
+												</span>
+												<button
+													onClick={handleNextPage}
+													disabled={
+														currentPage ===
+														totalPages
+													}
+													className={`w-8 h-8 rounded-md flex items-center justify-center text-sm transition-colors ${
+														currentPage ===
+														totalPages
+															? 'bg-gray-700 text-gray-500 cursor-not-allowed'
+															: 'bg-gray-700 text-white hover:bg-gray-600'
+													}`}
+													title='Next page'>
+													<FontAwesomeIcon
+														icon={faChevronRight}
+													/>
+												</button>
+											</div>
+										</div>
+									)}
+							</div>
 							{isLoading ? (
 								<div className='flex-1 flex items-center justify-center text-gray-400'>
 									Loading items...
 								</div>
 							) : (
 								<div className='flex-1 min-h-0 overflow-y-auto'>
-									<div className='grid grid-cols-2 xl:grid-cols-3 gap-3 pb-4'>
-										{availableItems
-											.filter(
-												(item) =>
-													!selectedItems.some(
-														(selected) =>
-															selected.id ===
-															item.id
-													)
-											)
-											.map((item) => (
-												<div
-													key={item.id}
-													className='relative group'>
-													<div className='aspect-square rounded-md overflow-hidden border border-gray-600'>
-														<img
-															src={`${
-																import.meta.env
-																	.VITE_API_URL
-															}${
-																item.frontImgUrl
-															}`}
-															alt={item.title}
-															className='w-full h-full object-cover'
+									<div className='grid grid-cols-2 xl:grid-cols-3 gap-4 pb-6'>
+										{currentPageItems.map((item) => (
+											<div
+												key={item.id}
+												className='relative group'>
+												<div className='aspect-square rounded-md overflow-hidden border border-gray-600'>
+													<img
+														src={`${
+															import.meta.env
+																.VITE_API_URL
+														}${item.frontImgUrl}`}
+														alt={item.title}
+														className='w-full h-full object-cover'
+													/>
+													<button
+														onClick={() =>
+															handleAddItem(item)
+														}
+														className='absolute top-1 right-1 bg-green-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm hover:bg-green-700 opacity-0 group-hover:opacity-100 transition-opacity'
+														title={`Add ${item.title}`}>
+														<FontAwesomeIcon
+															icon={faPlus}
 														/>
-														<button
-															onClick={() =>
-																handleAddItem(
-																	item
-																)
-															}
-															className='absolute top-1 right-1 bg-green-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm hover:bg-green-700 opacity-0 group-hover:opacity-100 transition-opacity'
-															title={`Add ${item.title}`}>
-															<FontAwesomeIcon
-																icon={faPlus}
-															/>
-														</button>
-													</div>
-													<p className='text-xs text-center mt-1 truncate text-gray-300'>
-														{item.title}
-													</p>
+													</button>
 												</div>
-											))}
+												<p className='text-xs text-center mt-2 truncate text-gray-300'>
+													{item.title}
+												</p>
+											</div>
+										))}
 									</div>
+									{filteredAvailableItems.length === 0 && (
+										<div className='flex-1 flex items-center justify-center text-gray-400'>
+											<div className='text-center'>
+												<p>No available items</p>
+												<p className='text-sm'>
+													All items are already
+													selected
+												</p>
+											</div>
+										</div>
+									)}
 								</div>
 							)}
 						</div>
@@ -235,7 +310,7 @@ export default function EditOutfitModal({
 								</div>
 							) : (
 								<div className='flex-1 min-h-0 overflow-y-auto'>
-									<div className='grid grid-cols-2 xl:grid-cols-3 gap-3 pb-4'>
+									<div className='grid grid-cols-2 xl:grid-cols-3 gap-4 pb-6'>
 										{selectedItems.map((item) => (
 											<div
 												key={item.id}
@@ -262,7 +337,7 @@ export default function EditOutfitModal({
 														/>
 													</button>
 												</div>
-												<p className='text-xs text-center mt-1 truncate text-gray-300'>
+												<p className='text-xs text-center mt-2 truncate text-gray-300'>
 													{item.title}
 												</p>
 											</div>
