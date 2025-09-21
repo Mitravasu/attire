@@ -83,3 +83,38 @@ export interface UpdateOutfitRequest extends Request {
 		itemIds?: number[];
 	};
 }
+
+export interface PlannerEntry {
+	id: number;
+	date: string; // ISO date string (YYYY-MM-DD)
+	outfitId: number;
+	notes?: string;
+	createdAt: string;
+	updatedAt?: string;
+}
+
+export interface CreatePlannerEntryRequest extends Request {
+	body: {
+		date: string;
+		outfitId: number;
+		notes?: string;
+	};
+}
+
+export interface UpdatePlannerEntryRequest extends Request {
+	params: {
+		id: string;
+	};
+	body: {
+		date?: string;
+		outfitId?: number;
+		notes?: string;
+	};
+}
+
+export interface GetPlannerEntriesRequest extends Request {
+	query: {
+		startDate?: string;
+		endDate?: string;
+	};
+}

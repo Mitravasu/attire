@@ -7,6 +7,7 @@ import { migrateAddColorType } from './migrate-add-color-type';
 import { migrateAddFavorites } from './migrate-add-favorites';
 import { migrateAddIndexes } from './migrate-add-indexes';
 import { migrateAddOutfits } from './migrate-add-outfits';
+import { migrateAddPlanner } from './migrate-add-planner';
 
 // Database setup
 const dbDir = path.join(__dirname, '..', 'data');
@@ -61,6 +62,9 @@ export const initializeDatabase = (): void => {
 
 		// Add outfit tables
 		migrateAddOutfits();
+
+		// Add planner tables
+		migrateAddPlanner();
 
 		console.log('Database tables initialized successfully');
 	} catch (error) {
