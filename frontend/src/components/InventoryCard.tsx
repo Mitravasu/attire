@@ -167,23 +167,6 @@ export default function InventoryCard({
 				<div className='flex w-full justify-between items-center'>
 					<p className='text-md'>{item.title.toUpperCase()}</p>
 					<div className='flex space-x-2'>
-						{onAddToOutfit && (
-							<button
-								className={`cursor-pointer transition-colors ${
-									isInCurrentOutfit
-										? 'text-green-500 hover:text-green-400'
-										: 'hover:text-green-500'
-								}`}
-								onClick={() => onAddToOutfit(item)}
-								disabled={isInCurrentOutfit}
-								title={
-									isInCurrentOutfit
-										? 'Already in outfit'
-										: 'Add to outfit'
-								}>
-								<FontAwesomeIcon icon={faPlus} />
-							</button>
-						)}
 						<button
 							className='cursor-pointer hover:text-blue-500 transition-colors'
 							onClick={() => onEdit(item)}
