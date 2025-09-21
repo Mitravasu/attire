@@ -12,8 +12,6 @@ export class PlannerService {
 				.get();
 
 			if (!tableExists) {
-				console.log('Creating planner_entries table...');
-
 				// Create table without foreign key constraint to avoid issues
 				const createPlannerTable = db.prepare(`
 					CREATE TABLE planner_entries (
@@ -29,31 +27,22 @@ export class PlannerService {
 				createPlannerTable.run();
 
 				// Create indexes for better performance
-				try {
-					const createDateIndex = db.prepare(`
-						CREATE INDEX IF NOT EXISTS idx_planner_date ON planner_entries(date)
-					`);
+				const createDateIndex = db.prepare(`
+					CREATE INDEX IF NOT EXISTS idx_planner_date ON planner_entries(date)
+				`);
 
-					const createOutfitIdIndex = db.prepare(`
-						CREATE INDEX IF NOT EXISTS idx_planner_outfit_id ON planner_entries(outfitId)
-					`);
+				const createOutfitIdIndex = db.prepare(`
+					CREATE INDEX IF NOT EXISTS idx_planner_outfit_id ON planner_entries(outfitId)
+				`);
 
-					createDateIndex.run();
-					createOutfitIdIndex.run();
-				} catch (indexError) {
-					console.warn('Could not create indexes:', indexError);
-				}
-
-				console.log('Planner entries table created successfully');
-			} else {
-				console.log('Planner entries table already exists');
+				createDateIndex.run();
+				createOutfitIdIndex.run();
 			}
 		} catch (error) {
 			console.error(
 				'Error ensuring planner entries table exists:',
 				error
 			);
-			// Don't throw error to prevent breaking the service
 		}
 	}
 	// Create a new planner entry
@@ -166,23 +155,15 @@ export class PlannerService {
 							...entry,
 							outfit,
 						});
-					} else {
-						console.warn(
-							`Outfit with ID ${entry.outfitId} not found for planner entry ${entry.id}`
-						);
 					}
 				} catch (outfitError) {
-					console.error(
-						`Error fetching outfit ${entry.outfitId} for planner entry ${entry.id}:`,
-						outfitError
-					);
+					console.error('Error fetching outfit:', outfitError);
 				}
 			}
 
 			return result;
 		} catch (error) {
 			console.error('Error fetching planner entries:', error);
-			// Return empty array if table doesn't exist yet
 			return [];
 		}
 	}
@@ -286,10 +267,7 @@ export class PlannerService {
 
 			return stmt.all(outfitId) as InventoryItem[];
 		} catch (error) {
-			console.error(
-				`Error fetching items for outfit ${outfitId}:`,
-				error
-			);
+			console.error('Error fetching outfit items:', error);
 			return [];
 		}
 	}
