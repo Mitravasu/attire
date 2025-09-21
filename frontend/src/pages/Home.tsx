@@ -95,14 +95,16 @@ export default function Home() {
 				isVisible={isFormVisible}
 				setVisibility={setIsFormVisible}
 			/>
-			<div className='flex flex-col w-1/6 h-full '>
+			<div className='flex flex-col w-1/6 h-full space-y-2'>
 				<FilterPanel onFiltersChange={handleFiltersChange} />
-				<OutfitPanel
-					currentOutfit={currentOutfit}
-					onRemoveItem={handleRemoveFromOutfit}
-					onClearAll={handleClearOutfit}
-					onSaveOutfit={handleSaveOutfit}
-				/>
+				<div className='flex-1 min-h-0'>
+					<OutfitPanel
+						currentOutfit={currentOutfit}
+						onRemoveItem={handleRemoveFromOutfit}
+						onClearAll={handleClearOutfit}
+						onSaveOutfit={handleSaveOutfit}
+					/>
+				</div>
 			</div>
 			<div className='flex flex-1 flex-col w-full h-full space-y-2'>
 				<Button
