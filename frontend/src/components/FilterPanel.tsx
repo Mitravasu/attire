@@ -71,7 +71,7 @@ export default function FilterPanel({ onFiltersChange }: FilterPanelProps) {
 	};
 
 	return (
-		<div className='p-4 h-full w-1/6 min-w-1/6 space-y-3 border-2 border-white rounded-md'>
+		<div className='p-4 h-fit w-1/6 min-w-1/6 space-y-3 border-2 border-white rounded-md'>
 			<div className='flex justify-between items-center mb-4'>
 				<h3 className='font-bold text-lg'>Filters</h3>
 				<button

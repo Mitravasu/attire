@@ -23,18 +23,20 @@ export default function Home() {
 	};
 
 	return (
-		<div className='flex space-x-4 h-full w-full'>
+		<div className='flex space-x-4 w-full h-full'>
 			<AddInventoryForm
 				isVisible={isFormVisible}
 				setVisibility={setIsFormVisible}
 			/>
 			<FilterPanel onFiltersChange={handleFiltersChange} />
-			<div className='flex flex-col h-full w-full space-y-2'>
+			<div className='flex flex-col w-full h-full space-y-2'>
 				<Button
 					onClick={() => setIsFormVisible(true)}
 					label='Add Item'
 				/>
-				<InventoryPanel filters={filters} />
+				<div className='flex-1 min-h-0'>
+					<InventoryPanel filters={filters} />
+				</div>
 			</div>
 		</div>
 	);
