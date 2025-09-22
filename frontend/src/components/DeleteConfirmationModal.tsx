@@ -99,7 +99,7 @@ export default function DeleteConfirmationModal({
 												import.meta.env.VITE_API_URL
 											}${item.backImgUrl}`}
 											alt={`${item.title} - back`}
-											className='w-12 h-12 object-cover border rounded'
+											className='w-20 h-20 object-cover rounded'
 										/>
 									</div>
 								)}

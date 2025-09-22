@@ -37,12 +37,12 @@ export default function EditOutfitModal({
 
 	// Initialize form when outfit changes
 	useEffect(() => {
-		if (outfit) {
+		if (isVisible && outfit) {
 			setOutfitName(outfit.name);
 			setSelectedItems([...outfit.items]);
 			fetchAvailableItems();
 		}
-	}, [outfit]);
+	}, [isVisible, outfit]);
 
 	// Reset pagination when available items change
 	useEffect(() => {

@@ -35,7 +35,7 @@ export default function OutfitCard({
 			onMouseEnter={() => setIsHovered(true)}
 			onMouseLeave={() => setIsHovered(false)}>
 			{/* Header with outfit name and actions */}
-			<div className='p-4 border-b border-gray-600 flex justify-between items-start'>
+			<div className='p-4 shadow-md flex justify-between items-start'>
 				<div className='flex-1 min-w-0'>
 					<h3 className='text-lg font-semibold truncate mb-1'>
 						{outfit.name}
