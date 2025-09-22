@@ -52,8 +52,6 @@ export default function OutfitSidebar({ onDragStart }: OutfitSidebarProps) {
 
 	// Calculate pagination values
 	const totalPages = Math.ceil(totalOutfits / itemsPerPage);
-	const startIndex = (currentPage - 1) * itemsPerPage;
-	const endIndex = startIndex + itemsPerPage;
 
 	const handlePreviousPage = () => {
 		setCurrentPage((prev) => Math.max(1, prev - 1));
@@ -111,13 +109,9 @@ export default function OutfitSidebar({ onDragStart }: OutfitSidebarProps) {
 				{/* Pagination */}
 				{!searchTerm && totalOutfits > itemsPerPage && (
 					<SmallPagination
-						startIndex={startIndex}
-						endIndex={endIndex}
-						filteredAvailableItems={filteredOutfits}
 						handlePreviousPage={handlePreviousPage}
 						currentPage={currentPage}
 						totalPages={totalPages}
-						totalItems={totalOutfits}
 						handleNextPage={handleNextPage}
 					/>
 				)}

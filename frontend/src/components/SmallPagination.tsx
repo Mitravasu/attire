@@ -5,19 +5,11 @@ import {
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 export default function SmallPagination({
-	startIndex,
-	endIndex,
-	filteredAvailableItems,
 	handlePreviousPage,
 	currentPage,
 	totalPages,
 	handleNextPage,
-	totalItems,
 }: {
-	startIndex: number;
-	totalItems: number;
-	endIndex: number;
-	filteredAvailableItems: any[];
 	handlePreviousPage: () => void;
 	currentPage: number;
 	totalPages: number;
@@ -25,15 +17,11 @@ export default function SmallPagination({
 }) {
 	return (
 		<div className='flex items-center gap-3'>
-			{/* <span className='text-sm'>
-				{startIndex + 1}-{Math.min(endIndex, totalItems)} of{' '}
-				{totalItems}
-			</span> */}
 			<div className='flex items-center gap-1'>
 				<button
 					onClick={handlePreviousPage}
 					disabled={currentPage === 1}
-					className={`w-8 h-8 rounded-md flex items-center justify-center text-sm transition-colors ${
+					className={`w-8 h-8 rounded-full flex items-center justify-center text-sm transition-colors ${
 						currentPage === 1
 							? 'bg-gray-700 text-gray-500 cursor-not-allowed'
 							: 'bg-gray-700 text-white hover:bg-gray-600 cursor-pointer'
@@ -47,7 +35,7 @@ export default function SmallPagination({
 				<button
 					onClick={handleNextPage}
 					disabled={currentPage === totalPages}
-					className={`w-8 h-8 rounded-md flex items-center justify-center text-sm transition-colors ${
+					className={`w-8 h-8 rounded-full flex items-center justify-center text-sm transition-colors ${
 						currentPage === totalPages
 							? 'bg-gray-700 text-gray-500 cursor-not-allowed'
 							: 'bg-gray-700 text-white hover:bg-gray-600 cursor-pointer'

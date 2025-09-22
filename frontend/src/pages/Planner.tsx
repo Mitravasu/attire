@@ -13,17 +13,13 @@ import {
 	getPlannerEntries,
 	createPlannerEntry,
 	deletePlannerEntry,
-	getOutfits,
 } from '../utils/api';
 import Button from '@components/Button';
 
 export default function Planner() {
 	const [weekDays, setWeekDays] = useState<WeekDay[]>(getCurrentWeekDates());
-	const [currentPage, setCurrentPage] = useState(1);
 	const [isDragging, setIsDragging] = useState(false);
 	const [isLoading, setIsLoading] = useState(true);
-
-	const itemsPerPage = 10;
 
 	// Load planner entries for the current week
 	const loadPlannerEntries = async () => {
@@ -151,7 +147,7 @@ export default function Planner() {
 	return (
 		<div className='flex flex-col h-full bg-white'>
 			{/* Week Navigation */}
-			<div className='px-6 py-4 shadow-md bg-gray-200'>
+			<div className='px-6 py-4 shadow-md bg-gray-200 rounded-lg'>
 				<div className='flex items-center justify-between'>
 					<div className='flex items-center space-x-4'>
 						<button
@@ -200,7 +196,7 @@ export default function Planner() {
 			</div>
 
 			{/* Main Content */}
-			<div className='flex-1 flex min-h-0 pt-2 space-x-3'>
+			<div className='flex-1 flex min-h-0 pt-3 space-x-3'>
 				<div className='flex-1 flex flex-col min-h-0'>
 					<WeekView
 						weekDays={weekDays}
