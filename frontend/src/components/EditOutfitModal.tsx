@@ -10,6 +10,8 @@ import {
 	faChevronRight,
 } from '@fortawesome/free-solid-svg-icons';
 import SmallPagination from './SmallPagination';
+import TextInput from './TextInput';
+import Button from './Button';
 
 interface EditOutfitModalProps {
 	isVisible: boolean;
@@ -145,16 +147,14 @@ export default function EditOutfitModal({
 	if (!isVisible || !outfit) return null;
 
 	return (
-		<div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4'>
-			<div className='bg-gray-900 border-2 border-white rounded-lg w-full max-w-6xl h-full max-h-[90vh] flex flex-col'>
+		<div className='fixed inset-0 bg-black/50 backdrop-blur-lg flex items-center justify-center z-50 p-4'>
+			<div className='bg-gray-200 border-2 border-white rounded-lg w-full max-w-6xl h-full max-h-[90vh] flex flex-col'>
 				{/* Header */}
 				<div className='flex items-center justify-between p-6 pb-4 flex-shrink-0'>
-					<h2 className='text-xl font-semibold text-white'>
-						Edit Outfit
-					</h2>
+					<h2 className='text-xl font-semibold'>Edit Outfit</h2>
 					<button
 						onClick={handleClose}
-						className='text-gray-400 hover:text-white transition-colors'>
+						className='text-gray-400 hover:text-white transition-colors cursor-pointer'>
 						<FontAwesomeIcon icon={faTimes} size='lg' />
 					</button>
 				</div>
@@ -168,40 +168,29 @@ export default function EditOutfitModal({
 
 				{/* Outfit Name */}
 				<div className='px-6 pb-4 flex-shrink-0'>
-					<label className='block text-sm font-medium text-gray-300 mb-2'>
-						Outfit Name
-					</label>
-					<input
-						type='text'
+					<TextInput
+						id='outfit-name'
+						label='Outfit Name'
 						value={outfitName}
-						onChange={(e) => setOutfitName(e.target.value)}
-						className='w-full p-2 border border-gray-600 rounded-md bg-gray-800 text-white placeholder-gray-400 focus:outline-none focus:border-white'
+						handleInputChange={(e) => setOutfitName(e.target.value)}
 						placeholder='Enter outfit name...'
 					/>
 				</div>
 
 				{/* Content Area */}
-				<div className='flex-1 min-h-0 px-6'>
+				<div className='flex-1 min-h-0 px-6 inset-shadow-sm'>
 					<div className='h-full grid grid-cols-1 lg:grid-cols-2 gap-6'>
 						{/* Available Items */}
 						<div className='flex flex-col min-h-0'>
-							<div className='flex items-center justify-between mb-4 flex-shrink-0'>
-								<h3 className='text-lg font-medium text-white'>
+							<div className='flex items-center justify-between py-2 flex-shrink-0 h-14'>
+								<h3 className='text-lg font-medium'>
 									Available Items
 								</h3>
 								{!isLoading &&
 									filteredAvailableItems.length > 0 && (
 										<SmallPagination
-											startIndex={startIndex}
-											endIndex={endIndex}
-											filteredAvailableItems={
-												filteredAvailableItems
-											}
 											handlePreviousPage={
 												handlePreviousPage
-											}
-											totalItems={
-												filteredAvailableItems.length
 											}
 											currentPage={currentPage}
 											totalPages={totalPages}
@@ -220,7 +209,7 @@ export default function EditOutfitModal({
 											<div
 												key={item.id}
 												className='relative group'>
-												<div className='aspect-square rounded-md overflow-hidden border border-gray-600'>
+												<div className='aspect-square rounded-md overflow-hidden shadow-md'>
 													<img
 														src={`${
 															import.meta.env
@@ -240,9 +229,6 @@ export default function EditOutfitModal({
 														/>
 													</button>
 												</div>
-												<p className='text-xs text-center mt-2 truncate text-gray-300'>
-													{item.title}
-												</p>
 											</div>
 										))}
 									</div>
@@ -263,9 +249,11 @@ export default function EditOutfitModal({
 
 						{/* Selected Items */}
 						<div className='flex flex-col min-h-0'>
-							<h3 className='text-lg font-medium text-white mb-3 flex-shrink-0'>
-								Selected Items ({selectedItems.length})
-							</h3>
+							<div className='flex items-center justify-between flex-shrink-0 h-14'>
+								<h3 className='text-lg font-medium flex-shrink-0'>
+									Selected Items ({selectedItems.length})
+								</h3>
+							</div>
 							{selectedItems.length === 0 ? (
 								<div className='flex-1 flex items-center justify-center text-gray-400 border-2 border-dashed border-gray-600 rounded-lg'>
 									<div className='text-center'>
@@ -286,7 +274,7 @@ export default function EditOutfitModal({
 											<div
 												key={item.id}
 												className='relative group'>
-												<div className='aspect-square rounded-md overflow-hidden border border-gray-600'>
+												<div className='aspect-square rounded-md overflow-hidden shadow-md'>
 													<img
 														src={`${
 															import.meta.env
@@ -308,9 +296,6 @@ export default function EditOutfitModal({
 														/>
 													</button>
 												</div>
-												<p className='text-xs text-center mt-2 truncate text-gray-300'>
-													{item.title}
-												</p>
 											</div>
 										))}
 									</div>
@@ -321,30 +306,29 @@ export default function EditOutfitModal({
 				</div>
 
 				{/* Actions */}
-				<div className='px-6 py-4 border-t border-gray-700 flex-shrink-0'>
+				<div className='px-6 py-4 flex flex-shrink-0 justify-end'>
 					<div className='flex gap-3'>
-						<button
+						<Button
+							label='Cancel'
 							onClick={handleClose}
-							className='px-4 py-2 border border-gray-600 text-gray-300 rounded-md hover:bg-gray-800 transition-colors'>
-							Cancel
-						</button>
-						<button
-							onClick={handleSave}
+							color='black'
+						/>
+						<Button
+							label={isSaving ? 'Saving...' : 'Save Changes'}
 							disabled={
 								!outfitName.trim() ||
 								selectedItems.length === 0 ||
 								isSaving
 							}
-							className={`px-4 py-2 rounded-md font-medium transition-colors ${
+							onClick={handleSave}
+							color={
 								outfitName.trim() &&
 								selectedItems.length > 0 &&
 								!isSaving
-									? 'bg-green-600 hover:bg-green-700 text-white'
-									: 'bg-gray-600 text-gray-400 cursor-not-allowed'
-							}`}>
-							<FontAwesomeIcon icon={faCheck} className='mr-2' />
-							{isSaving ? 'Saving...' : 'Save Changes'}
-						</button>
+									? 'green'
+									: 'gray'
+							}
+						/>
 					</div>
 				</div>
 			</div>

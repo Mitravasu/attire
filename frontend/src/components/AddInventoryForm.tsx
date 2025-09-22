@@ -165,7 +165,7 @@ export default function AddInventoryForm({
 	return (
 		<div className='fixed inset-0 bg-black/50 backdrop-blur-lg flex items-center justify-center z-50 p-4'>
 			<div
-				className={`bg-gray-200 p-4 rounded-md w-1/4 h-fit flex flex-col ${
+				className={`z-50 bg-gray-200 p-4 rounded-md w-1/4 h-fit flex flex-col ${
 					isVisible ? '' : 'hidden'
 				}`}>
 				<h2 className='text-2xl font-bold mb-6'>

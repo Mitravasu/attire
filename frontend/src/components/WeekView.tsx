@@ -52,10 +52,10 @@ function DayColumn({
 	};
 
 	return (
-		<div className='flex-1 h-full flex flex-col shadow-md'>
+		<div className='flex-1 h-full flex flex-col'>
 			{/* Day Header */}
 			<div
-				className={`p-4 text-center flex-shrink-0 border-b-1 border-gray-400 ${
+				className={`p-4 text-center flex-shrink-0 shadow-md ${
 					day.isToday ? 'bg-blue-600 text-white' : 'bg-gray-200'
 				}`}>
 				<div className='font-semibold text-sm uppercase tracking-wide'>
@@ -66,7 +66,7 @@ function DayColumn({
 
 			{/* Drop Zone */}
 			<div
-				className={`flex-1 transition-colors duration-200 overflow-y-auto p-3 ${
+				className={`flex-1 transition-colors duration-200 overflow-y-auto p-3 inset-shadow-sm ${
 					isDropZone ? 'bg-blue-500/20' : 'bg-gray-200'
 				} ${isDragging ? 'border-dashed' : ''}`}
 				onDragOver={handleDragOver}
