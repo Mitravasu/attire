@@ -24,7 +24,7 @@ function Layout({ children }: { children: React.ReactNode }) {
 createRoot(document.getElementById('root')!).render(
 	<StrictMode>
 		<Router>
-			<div className='font-display bg-gray-800 text-white flex flex-col h-screen w-full overflow-hidden'>
+			<div className='font-display bg-white flex flex-col h-screen w-full overflow-hidden'>
 				<Layout>
 					<App />
 				</Layout>

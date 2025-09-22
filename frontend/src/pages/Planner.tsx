@@ -13,19 +13,13 @@ import {
 	getPlannerEntries,
 	createPlannerEntry,
 	deletePlannerEntry,
-	getOutfits,
 } from '../utils/api';
+import Button from '@components/Button';
 
 export default function Planner() {
 	const [weekDays, setWeekDays] = useState<WeekDay[]>(getCurrentWeekDates());
-	const [outfits, setOutfits] = useState<Outfit[]>([]);
-	const [totalOutfits, setTotalOutfits] = useState(0);
-	const [currentPage, setCurrentPage] = useState(1);
 	const [isDragging, setIsDragging] = useState(false);
 	const [isLoading, setIsLoading] = useState(true);
-	const [isOutfitsLoading, setIsOutfitsLoading] = useState(false);
-
-	const itemsPerPage = 10;
 
 	// Load planner entries for the current week
 	const loadPlannerEntries = async () => {
@@ -62,25 +56,11 @@ export default function Planner() {
 		}
 	};
 
-	// Load available outfits
-	const loadOutfits = async (page: number = 1) => {
-		try {
-			setIsOutfitsLoading(true);
-			const result = await getOutfits(page, itemsPerPage);
-			setOutfits(result.outfits);
-			setTotalOutfits(result.total);
-		} catch (error) {
-			console.error('Error loading outfits:', error);
-		} finally {
-			setIsOutfitsLoading(false);
-		}
-	};
-
 	// Initial load
 	useEffect(() => {
 		const loadInitialData = async () => {
 			setIsLoading(true);
-			await Promise.all([loadPlannerEntries(), loadOutfits(1)]);
+			await loadPlannerEntries();
 			setIsLoading(false);
 		};
 
@@ -140,12 +120,6 @@ export default function Planner() {
 		setWeekDays(getCurrentWeekDates());
 	};
 
-	// Page change for outfits
-	const handlePageChange = (page: number) => {
-		setCurrentPage(page);
-		loadOutfits(page);
-	};
-
 	// Add drag end listener
 	useEffect(() => {
 		const handleGlobalDragEnd = () => {
@@ -171,14 +145,14 @@ export default function Planner() {
 	}
 
 	return (
-		<div className='flex flex-col h-full bg-gray-900'>
+		<div className='flex flex-col h-full bg-white'>
 			{/* Week Navigation */}
-			<div className='bg-gray-800 border-b border-gray-600 px-6 py-4'>
+			<div className='px-6 py-4 shadow-md bg-gray-200 rounded-lg'>
 				<div className='flex items-center justify-between'>
 					<div className='flex items-center space-x-4'>
 						<button
 							onClick={handlePreviousWeek}
-							className='p-2 text-gray-400 hover:text-white transition-colors rounded-lg hover:bg-gray-700'
+							className='p-2 text-white transition-colors rounded-full bg-gray-700 cursor-pointer'
 							title='Previous week'>
 							<svg
 								className='w-5 h-5'
@@ -194,14 +168,14 @@ export default function Planner() {
 							</svg>
 						</button>
 
-						<h1 className='text-white text-xl font-semibold'>
+						<h1 className='text-xl font-semibold'>
 							{formatDateForDisplay(weekDays[0].date)} -{' '}
 							{formatDateForDisplay(weekDays[6].date)}
 						</h1>
 
 						<button
 							onClick={handleNextWeek}
-							className='p-2 text-gray-400 hover:text-white transition-colors rounded-lg hover:bg-gray-700'
+							className='p-2 text-white transition-colors rounded-full bg-gray-700 cursor-pointer'
 							title='Next week'>
 							<svg
 								className='w-5 h-5'
@@ -217,18 +191,13 @@ export default function Planner() {
 							</svg>
 						</button>
 					</div>
-
-					<button
-						onClick={handleToday}
-						className='px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors text-sm font-medium'>
-						Today
-					</button>
+					<Button label='Today' onClick={handleToday} />
 				</div>
 			</div>
 
 			{/* Main Content */}
-			<div className='flex-1 flex min-h-0'>
-				<div className='flex-1 p-6 flex flex-col min-h-0'>
+			<div className='flex-1 flex min-h-0 pt-3 space-x-3'>
+				<div className='flex-1 flex flex-col min-h-0'>
 					<WeekView
 						weekDays={weekDays}
 						onDropOutfit={handleDropOutfit}
@@ -237,16 +206,7 @@ export default function Planner() {
 						isDragging={isDragging}
 					/>
 				</div>
-
-				<OutfitSidebar
-					outfits={outfits}
-					totalCount={totalOutfits}
-					currentPage={currentPage}
-					itemsPerPage={itemsPerPage}
-					onPageChange={handlePageChange}
-					onDragStart={handleDragStart}
-					isLoading={isOutfitsLoading}
-				/>
+				<OutfitSidebar onDragStart={handleDragStart} />
 			</div>
 
 			{/* Drag overlay */}

@@ -12,14 +12,17 @@ export default function TextInput({
 		e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
 	) => void;
 	required?: boolean;
-	label: string;
+	label?: string;
 	placeholder?: string;
 }) {
 	return (
 		<div className='flex flex-col'>
-			<label htmlFor={id} className='font-bold'>
-				{label}
-			</label>
+			{label && (
+				<label htmlFor={id} className='font-bold'>
+					{label}
+					{required ? <span className='text-red-600'> *</span> : ''}
+				</label>
+			)}
 			<input
 				type='text'
 				id={id}
@@ -27,7 +30,7 @@ export default function TextInput({
 				value={value}
 				onChange={handleInputChange}
 				required={required}
-				className='border-2 border-white bg-black p-2 rounded-md'
+				className='bg-white p-2 rounded-md text-black inset-shadow-sm'
 				placeholder={placeholder}
 			/>
 		</div>

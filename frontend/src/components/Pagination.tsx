@@ -68,9 +68,9 @@ export default function Pagination({
 	const pageNumbers = getPageNumbers();
 
 	return (
-		<div className='flex items-center justify-between w-full p-4 bg-black/20 rounded-md'>
+		<div className='absolute bottom-2 flex space-x-10 justify-self-center items-center w-fit p-4 bg-black/40 text-white backdrop-blur-md rounded-xl text-md'>
 			{/* Items count */}
-			<div className='text-sm text-gray-300'>
+			<div className='h-fit w-fit'>
 				Showing {startItem}-{endItem} of {totalItems} items
 			</div>
 
@@ -80,10 +80,10 @@ export default function Pagination({
 				<button
 					onClick={() => onPageChange(currentPage - 1)}
 					disabled={!hasPrev}
-					className={`px-3 py-2 rounded-md transition-colors ${
+					className={`w-8 h-8 rounded-full transition-colors ${
 						hasPrev
-							? 'bg-gray-700 hover:bg-gray-600 text-white'
-							: 'bg-gray-800 text-gray-500 cursor-not-allowed'
+							? 'bg-gray-700 hover:bg-gray-600 cursor-pointer'
+							: 'hidden'
 					}`}
 					title='Previous page'>
 					<FontAwesomeIcon icon={faChevronLeft} />
@@ -97,10 +97,10 @@ export default function Pagination({
 						) : (
 							<button
 								onClick={() => onPageChange(page as number)}
-								className={`px-3 py-2 rounded-md transition-colors ${
+								className={`h-8 w-8 rounded-full transition-colors ${
 									page === currentPage
-										? 'bg-blue-600 text-white'
-										: 'bg-gray-700 hover:bg-gray-600 text-white'
+										? 'bg-blue-600 font-bold text-white'
+										: 'bg-gray-700 hover:bg-gray-600 text-white cursor-pointer'
 								}`}>
 								{page}
 							</button>
@@ -112,10 +112,10 @@ export default function Pagination({
 				<button
 					onClick={() => onPageChange(currentPage + 1)}
 					disabled={!hasNext}
-					className={`px-3 py-2 rounded-md transition-colors ${
+					className={`w-8 h-8 rounded-full transition-colors ${
 						hasNext
-							? 'bg-gray-700 hover:bg-gray-600 text-white'
-							: 'bg-gray-800 text-gray-500 cursor-not-allowed'
+							? 'bg-gray-700 hover:bg-gray-600 text-white cursor-pointer'
+							: 'hidden'
 					}`}
 					title='Next page'>
 					<FontAwesomeIcon icon={faChevronRight} />
@@ -123,8 +123,8 @@ export default function Pagination({
 			</div>
 
 			{/* Items per page selector */}
-			<div className='flex items-center space-x-2 text-sm'>
-				<span className='text-gray-300'>Items per page:</span>
+			<div className='flex items-center space-x-2'>
+				<span className=''>Items per page:</span>
 				<select
 					value={itemsPerPage}
 					onChange={(e) => {
@@ -132,7 +132,7 @@ export default function Pagination({
 						const newLimit = parseInt(e.target.value);
 						onPageChange(1, newLimit);
 					}}
-					className='bg-gray-700 text-white border border-gray-600 rounded px-2 py-1'>
+					className='bg-white inset-shadow-sm text-black rounded-md px-2 py-1'>
 					<option value={10}>10</option>
 					<option value={20}>20</option>
 					<option value={50}>50</option>

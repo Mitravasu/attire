@@ -96,6 +96,10 @@ export default function Home() {
 				setVisibility={setIsFormVisible}
 			/>
 			<div className='flex flex-col w-1/6 h-full space-y-2'>
+				<Button
+					onClick={() => setIsFormVisible(true)}
+					label='Add Item'
+				/>
 				<FilterPanel onFiltersChange={handleFiltersChange} />
 				<div className='flex-1 min-h-0'>
 					<OutfitPanel
@@ -107,10 +111,6 @@ export default function Home() {
 				</div>
 			</div>
 			<div className='flex flex-1 flex-col w-full h-full space-y-2'>
-				<Button
-					onClick={() => setIsFormVisible(true)}
-					label='Add Item'
-				/>
 				<div className='flex-1 min-h-0'>
 					<InventoryPanel
 						filters={filters}

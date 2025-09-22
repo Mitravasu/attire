@@ -1,7 +1,8 @@
-'use client';
-
 import { useState, useEffect } from 'react';
 import Dropdown from './Dropdown';
+import Button from './Button';
+import { faTrash } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 interface FilterValues {
 	colors: string[];
@@ -71,13 +72,14 @@ export default function FilterPanel({ onFiltersChange }: FilterPanelProps) {
 	};
 
 	return (
-		<div className='p-4 h-fit w-full space-y-3 border-2 border-white rounded-md'>
+		<div className='p-4 h-fit w-full space-y-3 bg-gray-200 rounded-md inset-shadow-sm'>
 			<div className='flex justify-between items-center mb-4'>
 				<h3 className='font-bold text-lg'>Filters</h3>
 				<button
 					onClick={clearFilters}
-					className='text-sm text-blue-400 hover:text-blue-300'>
-					Clear All
+					className='py-1 px-2 bg-red-600 hover:bg-red-700 text-white rounded-full w-8 h-8 transition-colors cursor-pointer'
+					title='Clear all items'>
+					<FontAwesomeIcon icon={faTrash} />
 				</button>
 			</div>
 
@@ -105,29 +107,15 @@ export default function FilterPanel({ onFiltersChange }: FilterPanelProps) {
 				options={['', ...filterValues.types]}
 			/>
 
-			<div className='flex flex-col'>
-				<label htmlFor='isFavorite' className='font-bold'>
-					Favorites
-				</label>
-				<select
-					id='isFavorite'
-					name='isFavorite'
-					value={selectedFilters.isFavorite}
-					onChange={(e) =>
-						handleFilterChange('isFavorite', e.target.value)
-					}
-					className='border-2 border-white p-2 bg-black/20 rounded-md'>
-					<option value='' className='text-black'>
-						All Items
-					</option>
-					<option value='true' className='text-black'>
-						Favorites Only
-					</option>
-					<option value='false' className='text-black'>
-						Non-Favorites Only
-					</option>
-				</select>
-			</div>
+			<Dropdown
+				id='isFavorite'
+				label='Favorites'
+				value={selectedFilters.isFavorite}
+				onChange={(e) =>
+					handleFilterChange('isFavorite', e.target.value)
+				}
+				options={['', 'true', 'false']}
+			/>
 		</div>
 	);
 }

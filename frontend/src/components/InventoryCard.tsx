@@ -1,6 +1,6 @@
-import { faBookmark as unsaved } from '@fortawesome/free-regular-svg-icons';
+import { faHeart as unsaved } from '@fortawesome/free-regular-svg-icons';
 import {
-	faBookmark as saved,
+	faHeart as saved,
 	faEdit,
 	faTrash,
 	faSync,
@@ -100,8 +100,10 @@ export default function InventoryCard({
 	};
 
 	return (
-		<div ref={cardRef} className='flex flex-col w-70 h-fit m-3'>
-			<div className='relative w-full h-80 overflow-hidden border-secondary bg-gray-800 group'>
+		<div
+			ref={cardRef}
+			className='flex flex-col w-70 h-fit bg-white p-2 rounded-xl shadow-lg'>
+			<div className='relative w-full h-80 overflow-hidden border-secondary bg-trasnparent group'>
 				{isInView ? (
 					<>
 						<img
@@ -110,7 +112,7 @@ export default function InventoryCard({
 									? item.frontImgUrl
 									: item.backImgUrl
 							}`}
-							className={`w-full h-full object-cover transition-opacity duration-300 ${
+							className={`w-full h-full object-cover transition-opacity duration-300 rounded-xl ${
 								imageLoaded ? 'opacity-100' : 'opacity-0'
 							}`}
 							alt={`${item.title} - ${
@@ -132,86 +134,84 @@ export default function InventoryCard({
 						<div className='text-gray-400 text-sm'>📷</div>
 					</div>
 				)}
-				<div className='absolute top-2 left-2 bg-black bg-opacity-50 text-white text-xs px-2 py-1 rounded'>
-					{showFrontImage ? 'Front' : 'Back'}
-				</div>
 				{item.backImgUrl && (
 					<button
 						onClick={() => setShowFrontImage(!showFrontImage)}
-						className='absolute top-10 left-2 bg-black bg-opacity-50 text-white w-8 h-8 rounded flex items-center justify-center hover:bg-opacity-75 transition-all'
+						className='absolute top-2 left-2 bg-white/20 text-white border-1 border-white hover:bg-black/50 hover:border-black cursor-pointer w-8 h-8 rounded-full flex items-center justify-center hover:bg-opacity-75 transition-all'
 						title={`Switch to ${
 							showFrontImage ? 'back' : 'front'
 						} view`}>
 						<FontAwesomeIcon icon={faSync} className='text-xs' />
 					</button>
 				)}
-				{onAddToOutfit && (
+				<div className='absolute top-2 right-2 w-fit h-fit flex flex-col space-y-2'>
 					<button
-						onClick={() => onAddToOutfit(item)}
-						disabled={isInCurrentOutfit}
-						className={`absolute top-2 right-2 w-8 h-8 rounded flex items-center justify-center transition-opacity ${
-							isInCurrentOutfit
-								? 'bg-gray-600 text-gray-400 cursor-not-allowed opacity-0 group-hover:opacity-100'
-								: 'bg-green-600 text-white hover:bg-green-700 opacity-0 group-hover:opacity-100'
+						className={`w-8 h-8 bg-white/20 border-1 border-white rounded-full cursor-pointer ${
+							isUpdatingFavorite
+								? 'opacity-50 cursor-not-allowed'
+								: ''
+						} ${
+							isSaved
+								? 'text-red-400 hover:text-white'
+								: 'text-white hover:text-red-400'
 						}`}
+						onClick={handleToggleFavorite}
+						disabled={isUpdatingFavorite}
 						title={
-							isInCurrentOutfit
-								? 'Already in outfit'
-								: 'Add to outfit'
+							isSaved
+								? 'Remove from favorites'
+								: 'Add to favorites'
 						}>
-						<FontAwesomeIcon icon={faPlus} />
+						<FontAwesomeIcon icon={isSaved ? saved : unsaved} />
 					</button>
-				)}
-			</div>
-			<div className='flex flex-col w-full h-30 pt-1'>
-				<div className='flex w-full justify-between items-center'>
-					<p className='text-md'>{item.title.toUpperCase()}</p>
-					<div className='flex space-x-2'>
-						<button
-							className='cursor-pointer hover:text-blue-500 transition-colors'
-							onClick={() => onEdit(item)}
-							title='Edit item'>
-							<FontAwesomeIcon icon={faEdit} />
-						</button>
-						<button
-							className='cursor-pointer hover:text-red-500 transition-colors'
-							onClick={() => onDelete(item)}
-							title='Delete item'>
-							<FontAwesomeIcon icon={faTrash} />
-						</button>
-						<button
-							className={`cursor-pointer hover:text-accent transition-colors ${
-								isUpdatingFavorite
-									? 'opacity-50 cursor-not-allowed'
-									: ''
-							}`}
-							onClick={handleToggleFavorite}
-							disabled={isUpdatingFavorite}
-							title={
-								isSaved
-									? 'Remove from favorites'
-									: 'Add to favorites'
-							}>
-							<FontAwesomeIcon icon={isSaved ? saved : unsaved} />
-						</button>
-					</div>
 				</div>
-				<div className='flex flex-wrap space-x-2 pt-1'>
-					<p className='text-accent text-sm'>{`#${item.color.toUpperCase()}`}</p>
-					<p className='text-accent text-sm'>{`#${item.type.toUpperCase()}`}</p>
-					{tagsDisplay}
+				<div className='absolute bottom-2 right-2 w-fit h-fit flex flex-col space-y-2'>
+					{onAddToOutfit && (
+						<button
+							onClick={() => onAddToOutfit(item)}
+							disabled={isInCurrentOutfit}
+							className={`w-8 h-8 rounded-full flex items-center  justify-center ${
+								isInCurrentOutfit
+									? 'hidden'
+									: 'bg-white/20 text-white border-1 border-white hover:bg-green-600/50 hover:border-green-600 cursor-pointer'
+							}`}
+							title={
+								isInCurrentOutfit
+									? 'Already in outfit'
+									: 'Add to outfit'
+							}>
+							<FontAwesomeIcon icon={faPlus} />
+						</button>
+					)}
+					<button
+						className='w-8 h-8 bg-white/20 border-1 border-white hover:bg-blue-600/50 hover:border-blue-600 rounded-full text-white cursor-pointer'
+						onClick={() => onEdit(item)}
+						title='Edit item'>
+						<FontAwesomeIcon icon={faEdit} />
+					</button>
+					<button
+						className='w-8 h-8 bg-white/20 border-1 border-white hover:bg-red-600/50 hover:border-red-600 rounded-full text-white cursor-pointer'
+						onClick={() => onDelete(item)}
+						title='Delete item'>
+						<FontAwesomeIcon icon={faTrash} />
+					</button>
+				</div>
+			</div>
+			<div className='flex flex-col w-full h-30 p-2 rounded-lg'>
+				<div className='flex w-full justify-between items-center'>
+					<p className='text-md font-bold'>
+						{item.title.toUpperCase()}
+					</p>
 				</div>
 				<div className='pt-1'>
-					<span
-						className={`text-xs px-2 py-1 rounded-full ${
-							item.status === 'dirty'
-								? 'bg-red-200 text-red-800'
-								: item.status === 'washed'
-								? 'bg-yellow-200 text-yellow-800'
-								: 'bg-green-200 text-green-800'
-						}`}>
+					<span className={`text-sm rounded-full`}>
 						{item.status.toUpperCase()}
 					</span>
+				</div>
+				<div className='flex flex-wrap space-x-2 pt-1'>
+					<p className='text-accent text-sm'>{`#${item.color.toLowerCase()}`}</p>
+					<p className='text-accent text-sm'>{`#${item.type.toLowerCase()}`}</p>
+					{tagsDisplay}
 				</div>
 			</div>
 		</div>

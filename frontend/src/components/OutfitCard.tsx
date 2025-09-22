@@ -31,16 +31,16 @@ export default function OutfitCard({
 
 	return (
 		<div
-			className='border-2 border-white rounded-lg backdrop-blur-md bg-black bg-opacity-20 overflow-hidden transition-all duration-300 hover:bg-opacity-30 hover:shadow-lg'
+			className='rounded-lg backdrop-blur-md bg-white shadow-md overflow-hidden transition-all duration-300 hover:bg-opacity-30 hover:shadow-lg'
 			onMouseEnter={() => setIsHovered(true)}
 			onMouseLeave={() => setIsHovered(false)}>
 			{/* Header with outfit name and actions */}
-			<div className='p-4 border-b border-gray-600 flex justify-between items-start'>
+			<div className='p-4 shadow-md flex justify-between items-start'>
 				<div className='flex-1 min-w-0'>
-					<h3 className='text-lg font-semibold text-white truncate mb-1'>
+					<h3 className='text-lg font-semibold truncate mb-1'>
 						{outfit.name}
 					</h3>
-					<div className='flex items-center text-sm text-gray-300'>
+					<div className='flex items-center text-sm'>
 						<FontAwesomeIcon
 							icon={faCalendarAlt}
 							className='mr-1'
@@ -55,13 +55,13 @@ export default function OutfitCard({
 					}`}>
 					<button
 						onClick={() => onEdit(outfit)}
-						className='p-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors'
+						className='p-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors cursor-pointer'
 						title='Edit outfit'>
 						<FontAwesomeIcon icon={faEdit} />
 					</button>
 					<button
 						onClick={() => onDelete(outfit.id)}
-						className='p-2 bg-red-600 hover:bg-red-700 text-white rounded-md transition-colors'
+						className='p-2 bg-red-600 hover:bg-red-700 text-white rounded-md transition-colors cursor-pointer'
 						title='Delete outfit'>
 						<FontAwesomeIcon icon={faTrash} />
 					</button>
@@ -71,14 +71,14 @@ export default function OutfitCard({
 			{/* Items grid */}
 			<div className='p-4'>
 				<div className='flex items-center justify-between mb-3'>
-					<span className='text-sm text-gray-300'>
+					<span className='text-sm'>
 						{outfit.items.length}{' '}
 						{outfit.items.length === 1 ? 'item' : 'items'}
 					</span>
 				</div>
 
 				{outfit.items.length === 0 ? (
-					<div className='text-center py-8 text-gray-400'>
+					<div className='text-center py-8'>
 						<p>No items in this outfit</p>
 					</div>
 				) : (
@@ -87,7 +87,7 @@ export default function OutfitCard({
 							<div
 								key={item.id}
 								className='aspect-square relative group'>
-								<div className='w-full h-full rounded-md overflow-hidden border border-gray-600'>
+								<div className='w-full h-full rounded-md overflow-hidden shadow-md'>
 									<img
 										src={`${import.meta.env.VITE_API_URL}${
 											item.frontImgUrl
@@ -95,10 +95,6 @@ export default function OutfitCard({
 										alt={item.title}
 										className='w-full h-full object-cover'
 									/>
-								</div>
-								{/* Item info tooltip on hover */}
-								<div className='absolute bottom-0 left-0 right-0 bg-black bg-opacity-75 text-white text-xs p-1 truncate opacity-0 group-hover:opacity-100 transition-opacity'>
-									{item.title}
 								</div>
 							</div>
 						))}

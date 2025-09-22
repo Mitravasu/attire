@@ -1,5 +1,3 @@
-'use client';
-
 import { useState, useEffect } from 'react';
 import TextInput from './TextInput';
 import Dropdown from './Dropdown';
@@ -201,141 +199,148 @@ export default function EditInventoryForm({
 		}
 	};
 
-	if (!item) return null;
+	if (!isVisible || !item) return null;
 
 	return (
-		<div
-			className={`fixed inset-0 items-center self-center justify-self-center bg-black/50 z-50 backdrop-blur-md border-2 border-white p-4 rounded-md w-1/4 h-fit flex flex-col ${
-				isVisible ? '' : 'hidden'
-			}`}>
-			<h2 className='text-2xl font-bold mb-6'>Edit Inventory Item</h2>
+		<div className='fixed inset-0 bg-black/50 backdrop-blur-lg flex items-center justify-center z-50 p-4'>
+			<div
+				className={`z-50 bg-gray-200 p-4 rounded-md w-1/4 h-fit flex flex-col ${
+					isVisible ? '' : 'hidden'
+				}`}>
+				<h2 className='text-2xl font-bold mb-6'>Edit Inventory Item</h2>
 
-			{error && (
-				<div className='w-full p-3 mb-4 text-red-700 bg-red-100 border border-red-300 rounded'>
-					{error}
-				</div>
-			)}
+				{error && (
+					<div className='w-full p-3 mb-4 text-red-700 bg-red-100 border border-red-300 rounded'>
+						{error}
+					</div>
+				)}
 
-			{success && (
-				<div className='w-full p-3 mb-4 text-green-700 bg-green-100 border border-green-300 rounded'>
-					{success}
-				</div>
-			)}
+				{success && (
+					<div className='w-full p-3 mb-4 text-green-700 bg-green-100 border border-green-300 rounded'>
+						{success}
+					</div>
+				)}
 
-			<form onSubmit={handleSubmit} className='space-y-4'>
-				<TextInput
-					id='title'
-					label='Title *'
-					value={formData.title}
-					handleInputChange={handleInputChange}
-					placeholder='Enter item title'
-					required
-				/>
+				<form onSubmit={handleSubmit} className='space-y-4'>
+					<TextInput
+						id='title'
+						label='Title'
+						value={formData.title}
+						handleInputChange={handleInputChange}
+						placeholder='Enter item title'
+						required
+					/>
 
-				<div className='space-y-2'>
-					<label className='text-sm font-medium'>
-						Current Images
-					</label>
-					<div className='flex space-x-4'>
-						<div className='text-center'>
-							<p className='text-xs mb-1'>Front</p>
-							<img
-								src={`${import.meta.env.VITE_API_URL}${
-									item.frontImgUrl
-								}`}
-								alt={`${item.title} - front`}
-								className='w-20 h-20 object-cover border rounded'
-							/>
-						</div>
-						{item.backImgUrl && (
+					<div className='space-y-2'>
+						<label className='text-md font-bold'>
+							Current Images
+						</label>
+						<div className='flex space-x-4'>
 							<div className='text-center'>
-								<p className='text-xs mb-1'>Back</p>
+								<p className='text-xs mb-1'>Front</p>
 								<img
 									src={`${import.meta.env.VITE_API_URL}${
-										item.backImgUrl
+										item.frontImgUrl
 									}`}
-									alt={`${item.title} - back`}
-									className='w-20 h-20 object-cover border rounded'
+									alt={`${item.title} - front`}
+									className='w-20 h-20 object-cover rounded-lg shadow-md'
 								/>
 							</div>
-						)}
-						{!item.backImgUrl && (
-							<div className='text-center'>
-								<p className='text-xs mb-1'>Back</p>
-								<div className='w-20 h-20 border rounded bg-gray-200 flex items-center justify-center'>
-									<span className='text-xs text-gray-500'>
-										No back image
-									</span>
+							{item.backImgUrl && (
+								<div className='text-center'>
+									<p className='text-xs mb-1'>Back</p>
+									<img
+										src={`${import.meta.env.VITE_API_URL}${
+											item.backImgUrl
+										}`}
+										alt={`${item.title} - back`}
+										className='w-20 h-20 object-cover rounded-lg shadow-md'
+									/>
 								</div>
-							</div>
-						)}
+							)}
+							{!item.backImgUrl && (
+								<div className='text-center'>
+									<p className='text-xs mb-1'>Back</p>
+									<div className='w-20 h-20 rounded-lg bg-white p-2 flex items-center justify-center shadow-md'>
+										<span className='text-xs text-gray-500'>
+											No back image
+										</span>
+									</div>
+								</div>
+							)}
+						</div>
 					</div>
-				</div>
 
-				<FileInput
-					label='New Front Image (optional)'
-					id='edit-front-image'
-					onChange={handleFrontFileChange}
-					selectedFile={selectedFrontFile}
-					accept='image/*'
-				/>
-
-				<FileInput
-					label='New Back Image (optional)'
-					id='edit-back-image'
-					onChange={handleBackFileChange}
-					selectedFile={selectedBackFile}
-					accept='image/*'
-				/>
-
-				<TextInput
-					id='tags'
-					label='Tags * (comma-separated)'
-					value={formData.tags}
-					handleInputChange={handleInputChange}
-					placeholder='e.g., casual, shirt, blue'
-					required
-				/>
-
-				<Dropdown
-					id='color'
-					label='Color *'
-					value={formData.color}
-					onChange={handleInputChange}
-					options={[...COLOR_OPTIONS]}
-					required
-				/>
-
-				<Dropdown
-					id='type'
-					label='Type *'
-					value={formData.type}
-					onChange={handleInputChange}
-					options={[...TYPE_OPTIONS]}
-					required
-				/>
-
-				<Dropdown
-					id='status'
-					label='Status *'
-					value={formData.status}
-					onChange={handleInputChange}
-					options={['dirty', 'washed', 'ironed']}
-					required
-				/>
-
-				<div className='flex space-x-3 pt-4'>
-					<Button
-						onClick={function (): void {
-							throw new Error('Function not implemented.');
-						}}
-						type='submit'
-						disabled={isSubmitting}
-						label={isSubmitting ? 'Updating...' : 'Update Item'}
+					<FileInput
+						label='New Front Image (optional)'
+						id='edit-front-image'
+						onChange={handleFrontFileChange}
+						selectedFile={selectedFrontFile}
+						accept='image/*'
 					/>
-					<Button onClick={handleClose} label='Cancel' />
-				</div>
-			</form>
+
+					<FileInput
+						label='New Back Image (optional)'
+						id='edit-back-image'
+						onChange={handleBackFileChange}
+						selectedFile={selectedBackFile}
+						accept='image/*'
+					/>
+
+					<TextInput
+						id='tags'
+						label='Tags (comma-separated)'
+						value={formData.tags}
+						handleInputChange={handleInputChange}
+						placeholder='e.g., casual, shirt, blue'
+						required
+					/>
+
+					<Dropdown
+						id='color'
+						label='Color'
+						value={formData.color}
+						onChange={handleInputChange}
+						options={[...COLOR_OPTIONS]}
+						required
+					/>
+
+					<Dropdown
+						id='type'
+						label='Type'
+						value={formData.type}
+						onChange={handleInputChange}
+						options={[...TYPE_OPTIONS]}
+						required
+					/>
+
+					<Dropdown
+						id='status'
+						label='Status'
+						value={formData.status}
+						onChange={handleInputChange}
+						options={['dirty', 'washed', 'ironed']}
+						required
+					/>
+
+					<div className='flex justify-end space-x-3 pt-4'>
+						<Button
+							onClick={handleClose}
+							color='black'
+							label='Cancel'
+						/>
+
+						<Button
+							onClick={function (): void {
+								throw new Error('Function not implemented.');
+							}}
+							type='submit'
+							disabled={isSubmitting}
+							label={isSubmitting ? 'Updating...' : 'Update Item'}
+						/>
+					</div>
+				</form>
+			</div>
 		</div>
 	);
 }

@@ -10,6 +10,8 @@ interface ImportConfig {
 	defaultStatus: ValidStatus;
 	dryRun: boolean;
 	generateTitlesFromFilenames: boolean;
+	defaultColor?: string;
+	defaultType?: string;
 }
 
 class BulkImporter {
@@ -120,13 +122,15 @@ class BulkImporter {
 			// Copy file to uploads directory
 			const imgUrl = this.copyFileToUploads(filepath, uniqueFilename);
 
-			// Create database entry (using same image for front and back for bulk import)
+			// Create database entry (no back image for bulk import)
 			const newItem = InventoryService.createItem(
 				title,
 				imgUrl,
-				imgUrl, // Using same image for both front and back
+				null, // No back image for bulk imported items
 				this.config.defaultTags,
-				this.config.defaultStatus
+				this.config.defaultStatus,
+				'unknown', // Default color
+				'clothing' // Default type
 			);
 
 			console.log(`  ✓ Created item with ID: ${newItem.id}`);
@@ -287,10 +291,6 @@ async function main() {
 		printHelp();
 		process.exit(1);
 	}
-
-	// Initialize database
-	initializeDatabase();
-
 	// Create and run importer
 	const config: ImportConfig = {
 		sourceDirectory,
@@ -298,6 +298,8 @@ async function main() {
 		defaultStatus,
 		dryRun,
 		generateTitlesFromFilenames,
+		defaultColor: 'unknown',
+		defaultType: 'clothing',
 	};
 
 	const importer = new BulkImporter(config);
