@@ -6,7 +6,7 @@ export default function Button({
 	label,
 }: {
 	onClick: () => void;
-	color?: 'blue' | 'red';
+	color?: 'blue' | 'red' | 'black';
 	type?: 'button' | 'submit' | 'reset';
 	label: string;
 	disabled?: boolean;
@@ -18,6 +18,9 @@ export default function Button({
 			break;
 		case 'red':
 			colorStyling = 'bg-red-600 hover:bg-red-700 text-white';
+			break;
+		case 'black':
+			colorStyling = 'bg-black text-white hover:bg-gray-800';
 			break;
 	}
 

@@ -184,13 +184,13 @@ export default function InventoryCard({
 						</button>
 					)}
 					<button
-						className='w-8 h-8 bg-white/20 border-1 border-white hover:bg-blue-600/50 hover:border-blue-600 rounded-full text-white'
+						className='w-8 h-8 bg-white/20 border-1 border-white hover:bg-blue-600/50 hover:border-blue-600 rounded-full text-white cursor-pointer'
 						onClick={() => onEdit(item)}
 						title='Edit item'>
 						<FontAwesomeIcon icon={faEdit} />
 					</button>
 					<button
-						className='w-8 h-8 bg-white/20 border-1 border-white hover:bg-red-600/50 hover:border-red-600 rounded-full text-white'
+						className='w-8 h-8 bg-white/20 border-1 border-white hover:bg-red-600/50 hover:border-red-600 rounded-full text-white cursor-pointer'
 						onClick={() => onDelete(item)}
 						title='Delete item'>
 						<FontAwesomeIcon icon={faTrash} />

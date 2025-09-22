@@ -160,98 +160,105 @@ export default function AddInventoryForm({
 		}
 	};
 
+	if (!isVisible) return null;
+
 	return (
-		<div
-			className={`fixed inset-0 items-center self-center justify-self-center z-50 bg-black/50 backdrop-blur-md border-2 border-white p-4 rounded-md w-1/4 h-fit flex flex-col ${
-				isVisible ? '' : 'hidden'
-			}`}>
-			<h2 className='text-2xl font-bold mb-6'>Add New Inventory Item</h2>
+		<div className='fixed inset-0 bg-black/50 backdrop-blur-lg flex items-center justify-center z-50 p-4'>
+			<div
+				className={`bg-gray-200 p-4 rounded-md w-1/4 h-fit flex flex-col ${
+					isVisible ? '' : 'hidden'
+				}`}>
+				<h2 className='text-2xl font-bold mb-6'>
+					Add New Inventory Item
+				</h2>
 
-			{error && (
-				<div className='w-full p-3 mb-4 text-red-700 bg-red-100 border border-red-300 rounded'>
-					{error}
-				</div>
-			)}
+				{error && (
+					<div className='w-full p-3 mb-4 text-red-700 bg-red-100 border border-red-300 rounded'>
+						{error}
+					</div>
+				)}
 
-			{success && (
-				<div className='w-full p-3 mb-4 text-green-700 bg-green-100 border border-green-300 rounded'>
-					{success}
-				</div>
-			)}
+				{success && (
+					<div className='w-full p-3 mb-4 text-green-700 bg-green-100 border border-green-300 rounded'>
+						{success}
+					</div>
+				)}
 
-			<form onSubmit={handleSubmit} className='space-y-4'>
-				<TextInput
-					id='title'
-					label='Title *'
-					value={formData.title}
-					handleInputChange={handleInputChange}
-					placeholder='Enter item title'
-					required
-				/>
-				<FileInput
-					label='Front Image *'
-					id='frontImage'
-					onChange={handleFrontFileChange}
-					selectedFile={selectedFrontFile}
-					accept='image/*'
-					required
-				/>
-				<FileInput
-					label='Back Image (optional)'
-					id='backImage'
-					onChange={handleBackFileChange}
-					selectedFile={selectedBackFile}
-					accept='image/*'
-					required={false}
-				/>
-				<TextInput
-					id='tags'
-					label='Tags * (comma-separated)'
-					value={formData.tags}
-					handleInputChange={handleInputChange}
-					placeholder='e.g., casual, shirt, blue'
-					required
-				/>
-				<Dropdown
-					id='color'
-					label='Color *'
-					value={formData.color}
-					onChange={handleInputChange}
-					options={[...COLOR_OPTIONS]}
-					required
-				/>
-				<Dropdown
-					id='type'
-					label='Type *'
-					value={formData.type}
-					onChange={handleInputChange}
-					options={[...TYPE_OPTIONS]}
-					required
-				/>
-				<Dropdown
-					id='status'
-					label='Status *'
-					value={formData.status}
-					onChange={handleInputChange}
-					options={['dirty', 'washed', 'ironed']}
-					required
-				/>
-
-				<div className='flex space-x-3 pt-4'>
-					<Button
-						onClick={function (): void {
-							throw new Error('Function not implemented.');
-						}}
-						type='submit'
-						disabled={isSubmitting}
-						label={isSubmitting ? 'Adding...' : 'Add Item'}
+				<form onSubmit={handleSubmit} className='space-y-4'>
+					<TextInput
+						id='title'
+						label='Title'
+						value={formData.title}
+						handleInputChange={handleInputChange}
+						placeholder='Enter item title'
+						required
 					/>
-					<Button
-						onClick={() => setVisibility(false)}
-						label='Cancel'
+					<FileInput
+						label='Front Image'
+						id='frontImage'
+						onChange={handleFrontFileChange}
+						selectedFile={selectedFrontFile}
+						accept='image/*'
+						required
 					/>
-				</div>
-			</form>
+					<FileInput
+						label='Back Image (optional)'
+						id='backImage'
+						onChange={handleBackFileChange}
+						selectedFile={selectedBackFile}
+						accept='image/*'
+						required={false}
+					/>
+					<TextInput
+						id='tags'
+						label='Tags (comma-separated)'
+						value={formData.tags}
+						handleInputChange={handleInputChange}
+						placeholder='e.g., casual, shirt, blue'
+						required
+					/>
+					<Dropdown
+						id='color'
+						label='Color'
+						value={formData.color}
+						onChange={handleInputChange}
+						options={[...COLOR_OPTIONS]}
+						required
+					/>
+					<Dropdown
+						id='type'
+						label='Type'
+						value={formData.type}
+						onChange={handleInputChange}
+						options={[...TYPE_OPTIONS]}
+						required
+					/>
+					<Dropdown
+						id='status'
+						label='Status'
+						value={formData.status}
+						onChange={handleInputChange}
+						options={['dirty', 'washed', 'ironed']}
+						required
+					/>
+
+					<div className='flex justify-end space-x-3 pt-4'>
+						<Button
+							onClick={() => setVisibility(false)}
+							color='black'
+							label='Cancel'
+						/>
+						<Button
+							onClick={function (): void {
+								throw new Error('Function not implemented.');
+							}}
+							type='submit'
+							disabled={isSubmitting}
+							label={isSubmitting ? 'Adding...' : 'Add Item'}
+						/>
+					</div>
+				</form>
+			</div>
 		</div>
 	);
 }
