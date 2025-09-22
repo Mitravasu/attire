@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import Dropdown from './Dropdown';
-import Button from './Button';
 import { faTrash } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
