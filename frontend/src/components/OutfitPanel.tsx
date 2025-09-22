@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { CurrentOutfit } from 'src/types';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTimes, faCheck, faTrash } from '@fortawesome/free-solid-svg-icons';
-import TextInput from './TextInput';
 
 interface OutfitPanelProps {
 	currentOutfit: CurrentOutfit;
