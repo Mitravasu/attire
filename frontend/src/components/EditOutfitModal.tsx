@@ -9,6 +9,7 @@ import {
 	faChevronLeft,
 	faChevronRight,
 } from '@fortawesome/free-solid-svg-icons';
+import SmallPagination from './SmallPagination';
 
 interface EditOutfitModalProps {
 	isVisible: boolean;
@@ -190,52 +191,22 @@ export default function EditOutfitModal({
 								</h3>
 								{!isLoading &&
 									filteredAvailableItems.length > 0 && (
-										<div className='flex items-center gap-3'>
-											<span className='text-sm text-gray-400'>
-												{startIndex + 1}-
-												{Math.min(
-													endIndex,
-													filteredAvailableItems.length
-												)}{' '}
-												of{' '}
-												{filteredAvailableItems.length}
-											</span>
-											<div className='flex items-center gap-1'>
-												<button
-													onClick={handlePreviousPage}
-													disabled={currentPage === 1}
-													className={`w-8 h-8 rounded-md flex items-center justify-center text-sm transition-colors ${
-														currentPage === 1
-															? 'bg-gray-700 text-gray-500 cursor-not-allowed'
-															: 'bg-gray-700 text-white hover:bg-gray-600'
-													}`}
-													title='Previous page'>
-													<FontAwesomeIcon
-														icon={faChevronLeft}
-													/>
-												</button>
-												<span className='text-sm text-gray-300 px-2'>
-													{currentPage} / {totalPages}
-												</span>
-												<button
-													onClick={handleNextPage}
-													disabled={
-														currentPage ===
-														totalPages
-													}
-													className={`w-8 h-8 rounded-md flex items-center justify-center text-sm transition-colors ${
-														currentPage ===
-														totalPages
-															? 'bg-gray-700 text-gray-500 cursor-not-allowed'
-															: 'bg-gray-700 text-white hover:bg-gray-600'
-													}`}
-													title='Next page'>
-													<FontAwesomeIcon
-														icon={faChevronRight}
-													/>
-												</button>
-											</div>
-										</div>
+										<SmallPagination
+											startIndex={startIndex}
+											endIndex={endIndex}
+											filteredAvailableItems={
+												filteredAvailableItems
+											}
+											handlePreviousPage={
+												handlePreviousPage
+											}
+											totalItems={
+												filteredAvailableItems.length
+											}
+											currentPage={currentPage}
+											totalPages={totalPages}
+											handleNextPage={handleNextPage}
+										/>
 									)}
 							</div>
 							{isLoading ? (
