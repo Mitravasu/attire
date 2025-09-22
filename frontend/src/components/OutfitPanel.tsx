@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { CurrentOutfit } from 'src/types';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTimes, faCheck, faTrash } from '@fortawesome/free-solid-svg-icons';
+import TextInput from './TextInput';
 
 interface OutfitPanelProps {
 	currentOutfit: CurrentOutfit;
@@ -28,18 +29,17 @@ export default function OutfitPanel({
 	const canSave = outfitName.trim() !== '' && currentOutfit.items.length > 0;
 
 	return (
-		<div className='border-2 border-white rounded-md backdrop-blur-md h-full flex flex-col'>
-			<div className='p-3 flex items-center justify-between bg-black bg-opacity-20 flex-shrink-0'>
+		<div className='bg-gray-200 rounded-md h-full flex flex-col'>
+			<div className='p-3 flex items-center justify-between bg-opacity-20 flex-shrink-0'>
 				<h2 className='text-lg font-semibold'>
-					Create Outfit ({currentOutfit.items.length})
+					Outfit ({currentOutfit.items.length})
 				</h2>
 				{currentOutfit.items.length > 0 && (
 					<button
 						onClick={onClearAll}
-						className='py-1 px-2 bg-red-600 hover:bg-red-700 text-white rounded-md text-sm font-medium transition-colors'
+						className='py-1 px-2 bg-red-600 hover:bg-red-700 rounded-full w-8 h-8 text-white transition-colors cursor-pointer'
 						title='Clear all items'>
-						<FontAwesomeIcon icon={faTrash} className='mr-1' />
-						Clear All
+						<FontAwesomeIcon icon={faTrash} />
 					</button>
 				)}
 			</div>
@@ -55,13 +55,13 @@ export default function OutfitPanel({
 						<div className='grid grid-cols-3 gap-2 overflow-y-auto h-full'>
 							{currentOutfit.items.map((item) => (
 								<div key={item.id} className='relative group'>
-									<div className='aspect-square rounded-md overflow-hidden border border-gray-600'>
+									<div className='rounded-lg border-1 border-white'>
 										<img
 											src={`${
 												import.meta.env.VITE_API_URL
 											}${item.frontImgUrl}`}
 											alt={item.title}
-											className='w-full h-full object-cover'
+											className='w-full h-full object-cover rounded-lg'
 										/>
 										<button
 											onClick={() =>
@@ -72,9 +72,6 @@ export default function OutfitPanel({
 											<FontAwesomeIcon icon={faTimes} />
 										</button>
 									</div>
-									<p className='text-xs text-center mt-1 truncate'>
-										{item.title}
-									</p>
 								</div>
 							))}
 						</div>
@@ -89,12 +86,7 @@ export default function OutfitPanel({
 							placeholder='Enter outfit name...'
 							value={outfitName}
 							onChange={(e) => setOutfitName(e.target.value)}
-							className='w-full p-2 border border-gray-600 rounded-md bg-black bg-opacity-30 text-white placeholder-gray-400 focus:outline-none focus:border-white'
-							onKeyPress={(e) => {
-								if (e.key === 'Enter' && canSave) {
-									handleSave();
-								}
-							}}
+							className='w-full p-2 bg-white text-black rounded-lg inset-shadow-sm'
 						/>
 					</div>
 				)}

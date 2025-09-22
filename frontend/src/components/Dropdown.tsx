@@ -25,7 +25,7 @@ export default function Dropdown({
 				name={id}
 				value={value}
 				onChange={onChange}
-				className='border-2 border-white p-2 bg-black/20 rounded-md'
+				className='bg-white text-md p-2 rounded-lg text-black shadow-md'
 				required={required}>
 				{options.map((option) => (
 					<option key={option} value={option} className='text-black'>

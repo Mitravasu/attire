@@ -122,11 +122,11 @@ class BulkImporter {
 			// Copy file to uploads directory
 			const imgUrl = this.copyFileToUploads(filepath, uniqueFilename);
 
-			// Create database entry (using same image for front and back for bulk import)
+			// Create database entry (no back image for bulk import)
 			const newItem = InventoryService.createItem(
 				title,
 				imgUrl,
-				imgUrl, // Using same image for both front and back
+				null, // No back image for bulk imported items
 				this.config.defaultTags,
 				this.config.defaultStatus,
 				'unknown', // Default color
