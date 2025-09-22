@@ -32,6 +32,8 @@ services:
       - attire-data:/app/data
       # Mount uploads directory for user uploaded images
       - attire-uploads:/app/uploads
+      # Mount local folder for bulk import (replace with your actual path)
+      # path/on/local/computer:/app/import-source
     networks:
       - attire-network
 

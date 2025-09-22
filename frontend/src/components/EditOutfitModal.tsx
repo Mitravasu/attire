@@ -1,14 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Outfit, InventoryItem } from 'src/types';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import {
-	faTimes,
-	faCheck,
-	faPlus,
-	faMinus,
-	faChevronLeft,
-	faChevronRight,
-} from '@fortawesome/free-solid-svg-icons';
+import { faTimes, faPlus, faMinus } from '@fortawesome/free-solid-svg-icons';
 import SmallPagination from './SmallPagination';
 import TextInput from './TextInput';
 import Button from './Button';
