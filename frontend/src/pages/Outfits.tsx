@@ -5,13 +5,12 @@ import EditOutfitModal from '@components/EditOutfitModal';
 import DeleteOutfitModal from '@components/DeleteOutfitModal';
 import SkeletonCard from '@components/SkeletonCard';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPlus, faRefresh } from '@fortawesome/free-solid-svg-icons';
+import { faPlus } from '@fortawesome/free-solid-svg-icons';
 
 export default function Outfits() {
 	const [outfits, setOutfits] = useState<Outfit[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
-	const [refreshing, setRefreshing] = useState(false);
 
 	// Modal states
 	const [editModalVisible, setEditModalVisible] = useState(false);
@@ -23,10 +22,7 @@ export default function Outfits() {
 	} | null>(null);
 
 	// Fetch outfits from the API
-	const fetchOutfits = async (showRefreshing = false) => {
-		if (showRefreshing) setRefreshing(true);
-		else setIsLoading(true);
-
+	const fetchOutfits = async () => {
 		setError(null);
 
 		try {
@@ -46,7 +42,6 @@ export default function Outfits() {
 			);
 		} finally {
 			setIsLoading(false);
-			setRefreshing(false);
 		}
 	};
 
@@ -78,42 +73,8 @@ export default function Outfits() {
 		setOutfitToDelete(null);
 	};
 
-	const handleRefresh = () => {
-		fetchOutfits(true);
-	};
-
 	return (
-		<div className='flex flex-col h-full w-full p-6'>
-			{/* Header */}
-			<div className='flex items-center justify-between mb-6'>
-				<div>
-					<h1 className='text-4xl font-bold text-white'>Outfits</h1>
-					<p className='text-gray-300 mt-1'>
-						{outfits.length === 0
-							? 'No outfits created yet'
-							: `${outfits.length} ${
-									outfits.length === 1 ? 'outfit' : 'outfits'
-							  }`}
-					</p>
-				</div>
-
-				<div className='flex gap-3'>
-					<button
-						onClick={handleRefresh}
-						disabled={refreshing}
-						className='px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-md font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed'
-						title='Refresh outfits'>
-						<FontAwesomeIcon
-							icon={faRefresh}
-							className={`mr-2 ${
-								refreshing ? 'animate-spin' : ''
-							}`}
-						/>
-						{refreshing ? 'Refreshing...' : 'Refresh'}
-					</button>
-				</div>
-			</div>
-
+		<div className='flex flex-col h-full w-full p-6 bg-gray-200 rounded-md overflow-y-auto'>
 			{/* Content Area */}
 			<div className='flex-1 min-h-0'>
 				{/* Error State */}

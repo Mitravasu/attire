@@ -99,7 +99,7 @@ export default function OutfitPanel({
 							disabled={!canSave}
 							className={`w-full py-2 px-4 rounded-md font-medium transition-colors ${
 								canSave
-									? 'bg-green-600 hover:bg-green-700 text-white'
+									? 'bg-green-600 hover:bg-green-700 text-white cursor-pointer'
 									: 'bg-gray-600 text-gray-400 cursor-not-allowed'
 							}`}>
 							<FontAwesomeIcon icon={faCheck} className='mr-2' />
