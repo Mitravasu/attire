@@ -1,5 +1,6 @@
-import { Outfit, DraggedOutfit, WeekDay } from 'src/types';
+import { Outfit, DraggedOutfit, WeekDay, InventoryItem } from 'src/types';
 import { getImageUrl } from 'src/utils/api';
+import { useState } from 'react';
 
 export default function PlannerOutfitCard({
 	onDragStart,
@@ -10,6 +11,8 @@ export default function PlannerOutfitCard({
 	onRemoveOutfit: (entryId: number) => void;
 	onDragStart?: (dragData: DraggedOutfit) => void;
 }) {
+	const [hoveredItem, setHoveredItem] = useState<InventoryItem | null>(null);
+	const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
 	const handleOutfitDragStart = (
 		e: React.DragEvent,
 		outfit: Outfit,
@@ -34,6 +37,19 @@ export default function PlannerOutfitCard({
 
 	const handleRemoveOutfit = (entryId: number) => {
 		onRemoveOutfit(entryId);
+	};
+
+	const handleItemMouseEnter = (item: InventoryItem, e: React.MouseEvent) => {
+		setHoveredItem(item);
+		setMousePosition({ x: e.clientX, y: e.clientY });
+	};
+
+	const handleItemMouseMove = (e: React.MouseEvent) => {
+		setMousePosition({ x: e.clientX, y: e.clientY });
+	};
+
+	const handleItemMouseLeave = () => {
+		setHoveredItem(null);
 	};
 
 	return (
@@ -87,27 +103,58 @@ export default function PlannerOutfitCard({
 					</div>
 
 					{/* Outfit Items Preview */}
-					<div className='flex mt-2 space-x-1 overflow-x-auto'>
-						{outfit.items.slice(0, 3).map((item) => (
+					<div className='flex flex-col p-2 space-y-1 items-center overflow-x-auto'>
+						{outfit.items.slice(0, 4).map((item) => (
 							<div
 								key={item.id}
-								className='flex-shrink-0 w-8 h-8 rounded-sm bg-gray-600 bg-cover bg-center '
+								className='flex-shrink-0 w-20 h-20 rounded-sm bg-gray-600 bg-cover bg-center cursor-pointer hover:ring-2 hover:ring-blue-400 transition-all'
 								style={{
 									backgroundImage: `url(${getImageUrl(
 										item.frontImgUrl
 									)})`,
 								}}
 								title={item.title}
+								onMouseEnter={(e) =>
+									handleItemMouseEnter(item, e)
+								}
+								onMouseMove={handleItemMouseMove}
+								onMouseLeave={handleItemMouseLeave}
 							/>
 						))}
 						{outfit.items.length > 3 && (
 							<div className='flex-shrink-0 w-8 h-8 rounded-sm bg-gray-600 flex items-center justify-center text-xs text-gray-300'>
-								+{outfit.items.length - 3}
+								+{outfit.items.length - 4}
 							</div>
 						)}
 					</div>
 				</div>
 			))}
+
+			{/* Image Hover Preview */}
+			{hoveredItem && (
+				<div
+					className='fixed z-50 pointer-events-none'
+					style={{
+						left: mousePosition.x + 10,
+						top: mousePosition.y + 10,
+					}}>
+					<div className='bg-white rounded-lg shadow-xl border border-gray-200 p-2 max-w-xs'>
+						<img
+							src={getImageUrl(hoveredItem.frontImgUrl)}
+							alt={hoveredItem.title}
+							className='w-64 h-64 object-cover rounded-md'
+						/>
+						<div className='mt-2 p-1'>
+							<h4 className='font-medium text-sm text-gray-900 line-clamp-2'>
+								{hoveredItem.title}
+							</h4>
+							<p className='text-xs text-gray-600 mt-1'>
+								{hoveredItem.type} • {hoveredItem.color}
+							</p>
+						</div>
+					</div>
+				</div>
+			)}
 		</div>
 	);
 }
