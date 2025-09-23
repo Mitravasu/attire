@@ -1,4 +1,4 @@
-# Attire
+# attire
 
 A modern application to organize, plan, and manage your wardrobe.
 
@@ -396,3 +396,11 @@ proposals or architectural suggestions.
 ---
 
 Happy organizing!
+
+## 👨‍💻 About Me
+
+✨ **Mitravasu Prakash**
+
+🌐 [mitravasu.com](https://www.mitravasu.com/)
+
+[![Website](https://img.shields.io/badge/Visit%20My%20Website-FF7139?style=for-the-badge&logo=firefox&logoColor=white)](https://yourwebsite.com)
