@@ -8,6 +8,8 @@ interface WeekViewProps {
 	onRemoveOutfit: (entryId: number) => void;
 	onDragStart?: (dragData: DraggedOutfit) => void;
 	isDragging: boolean;
+	selectedDays: Set<string>;
+	onDaySelection: (date: string, isSelected: boolean) => void;
 }
 
 interface DayColumnProps {
@@ -16,6 +18,8 @@ interface DayColumnProps {
 	onRemoveOutfit: (entryId: number) => void;
 	onDragStart?: (dragData: DraggedOutfit) => void;
 	isDragging: boolean;
+	isSelected: boolean;
+	onDaySelection: (date: string, isSelected: boolean) => void;
 }
 
 function DayColumn({
@@ -24,6 +28,8 @@ function DayColumn({
 	onRemoveOutfit,
 	onDragStart,
 	isDragging,
+	isSelected,
+	onDaySelection,
 }: DayColumnProps) {
 	const [isDropZone, setIsDropZone] = useState(false);
 
@@ -58,6 +64,17 @@ function DayColumn({
 				className={`p-4 text-center flex-shrink-0 shadow-md ${
 					day.isToday ? 'bg-blue-600 text-white' : 'bg-gray-200'
 				}`}>
+				<div className='flex items-center justify-center mb-2'>
+					<input
+						type='checkbox'
+						checked={isSelected}
+						onChange={(e) =>
+							onDaySelection(day.date, e.target.checked)
+						}
+						className='w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2 cursor-pointer'
+						title='Select for packing list'
+					/>
+				</div>
 				<div className='font-semibold text-sm uppercase tracking-wide'>
 					{day.dayName}
 				</div>
@@ -94,6 +111,8 @@ export default function WeekView({
 	onRemoveOutfit,
 	onDragStart,
 	isDragging,
+	selectedDays,
+	onDaySelection,
 }: WeekViewProps) {
 	return (
 		<div className='bg-gray-200 rounded-lg overflow-hidden flex-1 min-h-0'>
@@ -106,6 +125,8 @@ export default function WeekView({
 						onRemoveOutfit={onRemoveOutfit}
 						onDragStart={onDragStart}
 						isDragging={isDragging}
+						isSelected={selectedDays.has(day.date)}
+						onDaySelection={onDaySelection}
 					/>
 				))}
 			</div>

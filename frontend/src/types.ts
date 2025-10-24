@@ -40,6 +40,7 @@ export type WeekDay = {
 	dayNumber: number; // Day of month
 	isToday: boolean;
 	outfits: (Outfit & { notes?: string })[];
+	isSelected?: boolean; // For multi-day selection
 };
 
 export type DraggedOutfit = {

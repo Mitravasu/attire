@@ -14,12 +14,15 @@ import {
 	createPlannerEntry,
 	deletePlannerEntry,
 } from '../utils/api';
+import { generatePDF } from '../utils/pdfExport';
 import Button from '@components/Button';
 
 export default function Planner() {
 	const [weekDays, setWeekDays] = useState<WeekDay[]>(getCurrentWeekDates());
 	const [isDragging, setIsDragging] = useState(false);
 	const [isLoading, setIsLoading] = useState(true);
+	const [selectedDays, setSelectedDays] = useState<Set<string>>(new Set());
+	const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
 
 	// Load planner entries for the current week
 	const loadPlannerEntries = async () => {
@@ -110,14 +113,56 @@ export default function Planner() {
 	// Week navigation
 	const handlePreviousWeek = () => {
 		setWeekDays(getPreviousWeek(weekDays));
+		// Keep selections when navigating - don't clear them
 	};
 
 	const handleNextWeek = () => {
 		setWeekDays(getNextWeek(weekDays));
+		// Keep selections when navigating - don't clear them
 	};
 
-	const handleToday = () => {
-		setWeekDays(getCurrentWeekDates());
+	const handleToday = async () => {
+		const currentWeek = getCurrentWeekDates();
+		const isAlreadyOnCurrentWeek = weekDays[0].date === currentWeek[0].date;
+
+		setWeekDays(currentWeek);
+
+		// If we're already on the current week, we need to manually reload
+		// the planner entries since the useEffect won't trigger
+		if (isAlreadyOnCurrentWeek) {
+			await loadPlannerEntries();
+		}
+		// Keep selections when navigating - don't clear them
+	};
+
+	// Handle day selection for PDF export
+	const handleDaySelection = (date: string, isSelected: boolean) => {
+		setSelectedDays((prev) => {
+			const newSet = new Set(prev);
+			if (isSelected) {
+				newSet.add(date);
+			} else {
+				newSet.delete(date);
+			}
+			return newSet;
+		});
+	};
+
+	// Generate PDF export
+	const handleExportPDF = async () => {
+		setIsGeneratingPDF(true);
+		try {
+			await generatePDF(weekDays, selectedDays);
+		} catch (error) {
+			console.error('Error generating PDF:', error);
+			if (error instanceof Error) {
+				alert(error.message);
+			} else {
+				alert('Failed to generate PDF. Please try again.');
+			}
+		} finally {
+			setIsGeneratingPDF(false);
+		}
 	};
 
 	// Add drag end listener
@@ -191,7 +236,61 @@ export default function Planner() {
 							</svg>
 						</button>
 					</div>
-					<Button label='Today' onClick={handleToday} />
+					<div className='flex items-center space-x-2'>
+						<div className='flex flex-col items-end'>
+							<div className='flex items-center space-x-2'>
+								<Button
+									label={
+										isGeneratingPDF
+											? 'Generating...'
+											: `Export PDF (${
+													selectedDays.size
+											  } day${
+													selectedDays.size !== 1
+														? 's'
+														: ''
+											  })`
+									}
+									onClick={handleExportPDF}
+									disabled={
+										selectedDays.size === 0 ||
+										isGeneratingPDF
+									}
+								/>
+								{selectedDays.size > 0 && (
+									<Button
+										label='Clear Selection'
+										onClick={() =>
+											setSelectedDays(new Set())
+										}
+										color='gray'
+									/>
+								)}
+								<Button label='Today' onClick={handleToday} />
+							</div>
+							{(() => {
+								const currentWeekDates = weekDays.map(
+									(day) => day.date
+								);
+								const selectedFromOtherWeeks = Array.from(
+									selectedDays
+								).filter(
+									(date) => !currentWeekDates.includes(date)
+								).length;
+								return (
+									selectedFromOtherWeeks > 0 && (
+										<span className='text-xs text-gray-600 mt-1'>
+											{selectedFromOtherWeeks} day
+											{selectedFromOtherWeeks !== 1
+												? 's'
+												: ''}{' '}
+											from other weeks
+										</span>
+									)
+								);
+							})()}
+						</div>
+					</div>
 				</div>
 			</div>
 
@@ -204,6 +303,8 @@ export default function Planner() {
 						onRemoveOutfit={handleRemoveOutfit}
 						onDragStart={handleDragStart}
 						isDragging={isDragging}
+						selectedDays={selectedDays}
+						onDaySelection={handleDaySelection}
 					/>
 				</div>
 				<OutfitSidebar onDragStart={handleDragStart} />
