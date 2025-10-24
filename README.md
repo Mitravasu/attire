@@ -123,6 +123,8 @@ docker compose ps
 -   Front / back image support (optional back image)
 -   Tag, categorize, favorite items
 
+![inventory page](images/main.png)
+
 ### Outfit Creation
 
 -   Build & save outfits
@@ -134,6 +136,8 @@ docker compose ps
 -   Calendar-based daily planner
 -   Drag & drop scheduling
 -   Search outfits by name or attributes
+
+![planner page](images/planner.png)
 
 ---
 
@@ -403,4 +407,4 @@ Happy organizing!
 
 🌐 [mitravasu.com](https://www.mitravasu.com/)
 
-[![Website](https://img.shields.io/badge/Visit%20My%20Website-FF7139?style=for-the-badge&logo=firefox&logoColor=white)](https://yourwebsite.com)
+[![Website](https://img.shields.io/badge/Visit%20My%20Website-FF7139?style=for-the-badge&logo=firefox&logoColor=white)](https://www.mitravasu.com/)

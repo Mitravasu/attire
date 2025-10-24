@@ -336,6 +336,9 @@ export const generatePDF = async (
 		});
 
 		// Calculate needed height for this day's content
+		const imageSize = 40; // Increased from 30
+		const itemSpacing = Math.max(imageSize + 5, 12); // Use larger of image height + padding or text height
+
 		let dayContentHeight = rowHeight; // minimum for date cell
 		if (day.outfits.length === 0) {
 			dayContentHeight = Math.max(dayContentHeight, rowHeight);
@@ -343,8 +346,8 @@ export const generatePDF = async (
 			let outfitContentHeight = 0;
 			day.outfits.forEach((outfit) => {
 				outfitContentHeight += 15; // outfit name
-				outfitContentHeight += outfit.items.length * 12; // items
-				outfitContentHeight += 5; // spacing after outfit
+				outfitContentHeight += outfit.items.length * itemSpacing; // items with proper spacing for images
+				outfitContentHeight += 10; // spacing after outfit (increased from 5)
 			});
 			dayContentHeight = Math.max(
 				dayContentHeight,
@@ -396,7 +399,7 @@ export const generatePDF = async (
 		pdf.text(dateLines, margin + 5, currentTableY + 12);
 
 		// Outfit cell content
-		let outfitY = currentTableY + 10;
+		let outfitY = currentTableY + 15; // Increased initial spacing
 		const outfitX = margin + dateColumnWidth + 5;
 
 		if (day.outfits.length === 0) {
@@ -409,11 +412,11 @@ export const generatePDF = async (
 				pdf.setFontSize(9);
 				pdf.setFont('helvetica', 'bold');
 				pdf.text(`• ${outfit.name}`, outfitX, outfitY);
-				outfitY += 12;
+				outfitY += 15;
 
 				// Outfit items
 				for (const item of outfit.items) {
-					// Small image
+					// Larger image
 					try {
 						const imageData = await loadImageAsBase64(
 							getImageUrl(item.frontImgUrl)
@@ -423,8 +426,8 @@ export const generatePDF = async (
 							'JPEG',
 							outfitX + 10,
 							outfitY - 8,
-							30,
-							30
+							imageSize,
+							imageSize
 						);
 					} catch (error) {
 						console.warn(
@@ -433,21 +436,30 @@ export const generatePDF = async (
 							error
 						);
 						pdf.setDrawColor(200, 200, 200);
-						pdf.rect(outfitX + 10, outfitY - 8, 8, 8);
+						pdf.rect(
+							outfitX + 10,
+							outfitY - 8,
+							imageSize,
+							imageSize
+						);
 					}
 
-					// Item text
+					// Item text - positioned better relative to larger image
 					pdf.setFontSize(8);
 					pdf.setFont('helvetica', 'normal');
 					const itemText = `${item.title} (${item.type}, ${item.color})`;
 					const itemLines = pdf.splitTextToSize(
 						itemText,
-						outfitColumnWidth - 30
+						outfitColumnWidth - imageSize - 25
 					);
-					pdf.text(itemLines, outfitX + 22, outfitY - 2);
-					outfitY += 10;
+					pdf.text(
+						itemLines,
+						outfitX + imageSize + 15,
+						outfitY + imageSize / 2 - 2
+					);
+					outfitY += itemSpacing;
 				}
-				outfitY += 30; // spacing between outfits
+				outfitY += 10; // spacing between outfits
 			}
 		}
 
