@@ -1,9 +1,0 @@
-@import 'tailwindcss';
-
-@theme {
-	--font-display: 'Inconsolata';
-
-	--color-primary: #393e41;
-	--color-secondary: #f6f7eb;
-	--color-accent: #e94f37;
-}
