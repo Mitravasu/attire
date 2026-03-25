@@ -28,14 +28,14 @@ test.describe("mobile smoke", () => {
     const firstOutfitCard = page.getByTestId(/^outfit-card-root-/).first();
     await expect(firstOutfitCard).toBeVisible();
 
-    await firstOutfitCard.getByRole("button", { name: "Edit" }).last().click();
+    await firstOutfitCard.getByRole("button", { name: "Edit" }).click();
     await expect(page.getByRole("heading", { name: "Edit Outfit" })).toBeVisible();
     await page.getByRole("button", { name: "Cancel" }).evaluate((button) => {
       (button as HTMLButtonElement).click();
     });
     await expect(page.getByRole("heading", { name: "Edit Outfit" })).toHaveCount(0);
 
-    await firstOutfitCard.getByRole("button", { name: "Delete" }).last().click();
+    await firstOutfitCard.getByRole("button", { name: "Delete" }).click();
     await expect(page.getByRole("heading", { name: "Delete Outfit" })).toBeVisible();
     await page.getByRole("button", { name: "Cancel" }).evaluate((button) => {
       (button as HTMLButtonElement).click();

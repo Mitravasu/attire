@@ -66,7 +66,9 @@ export function PlannerWeekView({
                 Drop an outfit here or select this day and use the sidebar action.
               </div>
               {dayEntries.length === 0 ? (
-                <p className="planner-day-row__empty">No outfit planned for this day.</p>
+                <p className="planner-day-row__empty">
+                  No outfit planned yet. Drop one here or assign from the sidebar.
+                </p>
               ) : (
                 dayEntries.map((entry) => (
                   <article

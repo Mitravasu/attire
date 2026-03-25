@@ -64,7 +64,10 @@ export function HomePage() {
 
     try {
       await updateInventoryFavorite(item.id, nextFavorite);
-      pushToast(nextFavorite ? "Marked as favorite." : "Removed favorite.");
+      pushToast(
+        nextFavorite ? "Marked as favorite." : "Removed favorite.",
+        "success",
+      );
     } catch (toggleError) {
       setItems((current) =>
         current.map((entry) =>
@@ -73,6 +76,7 @@ export function HomePage() {
       );
       pushToast(
         toggleError instanceof Error ? toggleError.message : "Favorite update failed.",
+        "error",
       );
     }
   }
@@ -80,11 +84,11 @@ export function HomePage() {
   function handleAddToDraft(item: InventoryItem) {
     setDraftItems((current) => {
       if (current.some((entry) => entry.id === item.id)) {
-        pushToast("Item is already in the draft outfit.");
+        pushToast("Item is already in the draft outfit.", "info");
         return current;
       }
 
-      pushToast(`Added ${item.title} to the draft outfit.`);
+      pushToast(`Added ${item.title} to the draft outfit.`, "success");
       return [...current, item];
     });
   }
@@ -102,7 +106,7 @@ export function HomePage() {
     setDraftItems([]);
     setOutfitName("");
     setDraftError(null);
-    pushToast("Draft outfit cleared.");
+    pushToast("Draft outfit cleared.", "info");
   }
 
   function confirmClearDraft() {
@@ -110,7 +114,7 @@ export function HomePage() {
     setOutfitName("");
     setDraftError(null);
     setIsDraftDiscardModalOpen(false);
-    pushToast("Draft outfit cleared.");
+    pushToast("Draft outfit cleared.", "info");
   }
 
   function handleEdit(item: InventoryItem) {
@@ -144,12 +148,12 @@ export function HomePage() {
       });
       setDraftItems([]);
       setOutfitName("");
-      pushToast("Outfit saved.");
+      pushToast("Outfit saved.", "success");
     } catch (error) {
       const message =
         error instanceof Error ? error.message : "Failed to save outfit.";
       setDraftError(message);
-      pushToast("Outfit save failed.");
+      pushToast("Outfit save failed.", "error");
     } finally {
       setIsSavingOutfit(false);
     }
@@ -268,8 +272,8 @@ export function HomePage() {
             ) : null}
             {!isLoading && !error && items.length === 0 ? (
               <EmptyState
-                title="No inventory items yet"
-                description="Inventory cards will appear here once items exist in the catalog."
+                title="Your wardrobe is still empty"
+                description="Add your first item to start filtering, favoriting, and building outfits from the inventory grid."
               />
             ) : null}
             {!isLoading && !error && items.length > 0 ? (

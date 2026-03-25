@@ -77,14 +77,14 @@ export function AddItemModal({ onClose, onSuccess }: AddItemModalProps) {
         frontImageUrl: formState.frontImageUrl,
         backImageUrl: formState.backImageUrl || undefined,
       });
-      pushToast("Inventory item created.");
+      pushToast("Inventory item created.", "success");
       onSuccess();
     } catch (error) {
       setErrors({
         submit:
           error instanceof Error ? error.message : "Failed to create inventory item.",
       });
-      pushToast("Create failed.");
+      pushToast("Create failed.", "error");
     } finally {
       setIsSubmitting(false);
     }

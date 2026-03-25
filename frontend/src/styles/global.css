@@ -5,14 +5,16 @@
     radial-gradient(circle at top left, rgba(212, 222, 215, 0.7), transparent 30%),
     linear-gradient(180deg, #f7f5ef 0%, #f0ece2 100%);
   color: #1c2430;
-  --surface: rgba(255, 255, 255, 0.78);
+  --surface: rgba(255, 255, 255, 0.88);
   --surface-strong: #ffffff;
-  --border: rgba(28, 36, 48, 0.1);
+  --border: rgba(28, 36, 48, 0.16);
   --shadow: 0 18px 48px rgba(32, 35, 38, 0.08);
   --accent: #2e5b4f;
   --accent-soft: #edf5f2;
-  --text-muted: #5f6978;
+  --text-muted: #475466;
   --danger: #ad3c2d;
+  --disabled-bg: #d7ddd5;
+  --disabled-text: #5f6a60;
 }
 
 * {
@@ -208,10 +210,6 @@ a:focus-visible,
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-}
-
-.outfit-card__actions--mobile {
-  display: none;
 }
 
 .outfit-card__body h3,
@@ -523,6 +521,12 @@ a:focus-visible,
   transform: translateY(-1px);
 }
 
+.button:disabled,
+.field__control:disabled,
+.pagination__button:disabled {
+  cursor: not-allowed;
+}
+
 .button--primary {
   background: var(--accent);
   color: #fff;
@@ -537,6 +541,14 @@ a:focus-visible,
   background: transparent;
   border: 1px solid var(--border);
   color: #1c2430;
+}
+
+.button:disabled {
+  background: var(--disabled-bg);
+  border-color: transparent;
+  color: var(--disabled-text);
+  opacity: 1;
+  transform: none;
 }
 
 .field {
@@ -556,6 +568,12 @@ a:focus-visible,
   border: 1px solid var(--border);
   border-radius: 16px;
   background: var(--surface-strong);
+  color: #1c2430;
+}
+
+.field__control:disabled {
+  background: #ecefe9;
+  color: var(--disabled-text);
 }
 
 .field__error {
@@ -733,8 +751,9 @@ a:focus-visible,
 }
 
 .pagination__button:disabled {
-  opacity: 0.45;
-  cursor: not-allowed;
+  background: #dbe2db;
+  color: var(--disabled-text);
+  opacity: 1;
 }
 
 .skeleton {
@@ -762,9 +781,26 @@ a:focus-visible,
 .toast {
   padding: 12px 16px;
   border-radius: 16px;
-  background: #19352f;
-  color: #fff;
+  border: 1px solid transparent;
   box-shadow: var(--shadow);
+}
+
+.toast--info {
+  background: #1f3445;
+  border-color: #29465d;
+  color: #fff;
+}
+
+.toast--success {
+  background: #1e4938;
+  border-color: #295f4a;
+  color: #fff;
+}
+
+.toast--error {
+  background: #6f2b21;
+  border-color: #8a3a2d;
+  color: #fff;
 }
 
 .inventory-grid {
@@ -974,14 +1010,6 @@ a:focus-visible,
 
   .outfit-card__header {
     flex-direction: column;
-  }
-
-  .outfit-card__actions--desktop {
-    display: none;
-  }
-
-  .outfit-card__actions--mobile {
-    display: flex;
   }
 
   .outfit-builder {

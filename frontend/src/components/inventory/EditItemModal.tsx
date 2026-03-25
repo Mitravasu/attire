@@ -82,14 +82,14 @@ export function EditItemModal({
         backImageUrl: formState.backImageUrl || undefined,
       });
 
-      pushToast("Inventory item updated.");
+      pushToast("Inventory item updated.", "success");
       onSuccess(updatedItem);
     } catch (error) {
       setErrors({
         submit:
           error instanceof Error ? error.message : "Failed to update inventory item.",
       });
-      pushToast("Update failed.");
+      pushToast("Update failed.", "error");
     } finally {
       setIsSubmitting(false);
     }

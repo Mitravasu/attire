@@ -139,9 +139,12 @@ export function PlannerPage() {
     try {
       const entry = await createPlannerEntry({ outfitId, date });
       setEntries((current) => [entry, ...current]);
-      pushToast("Outfit planned.");
+      pushToast("Outfit planned.", "success");
     } catch (error) {
-      pushToast(error instanceof Error ? error.message : "Failed to plan outfit.");
+      pushToast(
+        error instanceof Error ? error.message : "Failed to plan outfit.",
+        "error",
+      );
       setPlannerRequestVersion((current) => current + 1);
     }
   }
@@ -150,10 +153,11 @@ export function PlannerPage() {
     try {
       await deletePlannerEntry(entryId);
       setEntries((current) => current.filter((entry) => entry.id !== entryId));
-      pushToast("Planned outfit removed.");
+      pushToast("Planned outfit removed.", "success");
     } catch (error) {
       pushToast(
         error instanceof Error ? error.message : "Failed to remove planned outfit.",
+        "error",
       );
       setPlannerRequestVersion((current) => current + 1);
     }
@@ -217,9 +221,12 @@ export function PlannerPage() {
 
       const filename = `packing-list-${sortedDates[0]}-to-${sortedDates[sortedDates.length - 1]}.pdf`;
       downloadSimplePdf(filename, lines);
-      pushToast("Packing list PDF exported.");
+      pushToast("Packing list PDF exported.", "success");
     } catch (error) {
-      pushToast(error instanceof Error ? error.message : "Failed to export PDF.");
+      pushToast(
+        error instanceof Error ? error.message : "Failed to export PDF.",
+        "error",
+      );
     } finally {
       setIsExporting(false);
     }
@@ -328,7 +335,7 @@ export function PlannerPage() {
             {!sidebarError && !isSidebarLoading && sidebarOutfits.length === 0 ? (
               <EmptyState
                 title="No matching outfits"
-                description="Adjust the search query to find outfits by name, item title, or tags."
+                description="Try a different outfit name, clothing item, or tag to find something you can assign to the selected day."
               />
             ) : null}
             {!sidebarError && (isSidebarLoading || sidebarOutfits.length > 0) ? (

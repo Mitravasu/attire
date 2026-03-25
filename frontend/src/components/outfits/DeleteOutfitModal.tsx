@@ -23,10 +23,13 @@ export function DeleteOutfitModal({
 
     try {
       const deletedOutfit = await deleteOutfit(outfit.id);
-      pushToast("Outfit deleted.");
+      pushToast("Outfit deleted.", "success");
       onSuccess(deletedOutfit);
     } catch (error) {
-      pushToast(error instanceof Error ? error.message : "Failed to delete outfit.");
+      pushToast(
+        error instanceof Error ? error.message : "Failed to delete outfit.",
+        "error",
+      );
     } finally {
       setIsSubmitting(false);
     }

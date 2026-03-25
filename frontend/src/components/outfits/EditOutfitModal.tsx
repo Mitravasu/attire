@@ -116,13 +116,13 @@ export function EditOutfitModal({
         name: name.trim(),
         itemIds: selectedItems.map((item) => item.id),
       });
-      pushToast("Outfit updated.");
+      pushToast("Outfit updated.", "success");
       onSuccess(updatedOutfit);
     } catch (saveError) {
       setError(
         saveError instanceof Error ? saveError.message : "Failed to update outfit.",
       );
-      pushToast("Outfit update failed.");
+      pushToast("Outfit update failed.", "error");
     } finally {
       setIsSaving(false);
     }

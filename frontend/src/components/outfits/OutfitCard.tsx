@@ -18,30 +18,22 @@ export function OutfitCard({ outfit, onDelete, onEdit }: OutfitCardProps) {
       <div className="outfit-card__body">
         <div className="outfit-card__header">
           <h3 data-testid={`outfit-card-name-${outfit.id}`}>{outfit.name}</h3>
-          <div className="outfit-card__actions outfit-card__actions--desktop">
-            <Button
-              data-testid={`outfit-card-edit-${outfit.id}`}
-              onClick={() => onEdit(outfit)}
-              variant="ghost"
-            >
-              Edit
-            </Button>
-            <Button
-              data-testid={`outfit-card-delete-${outfit.id}`}
-              onClick={() => onDelete(outfit)}
-              variant="ghost"
-            >
-              Delete
-            </Button>
-          </div>
         </div>
         <p>{new Date(outfit.createdAt).toLocaleDateString()}</p>
         <span>{outfit.items.length} items</span>
-        <div className="outfit-card__actions outfit-card__actions--mobile">
-          <Button onClick={() => onEdit(outfit)} variant="ghost">
+        <div className="outfit-card__actions">
+          <Button
+            data-testid={`outfit-card-edit-${outfit.id}`}
+            onClick={() => onEdit(outfit)}
+            variant="ghost"
+          >
             Edit
           </Button>
-          <Button onClick={() => onDelete(outfit)} variant="ghost">
+          <Button
+            data-testid={`outfit-card-delete-${outfit.id}`}
+            onClick={() => onDelete(outfit)}
+            variant="ghost"
+          >
             Delete
           </Button>
         </div>

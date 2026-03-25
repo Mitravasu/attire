@@ -23,11 +23,12 @@ export function DeleteItemModal({
 
     try {
       const deletedItem = await deleteInventoryItem(item.id);
-      pushToast("Inventory item deleted.");
+      pushToast("Inventory item deleted.", "success");
       onSuccess(deletedItem);
     } catch (error) {
       pushToast(
         error instanceof Error ? error.message : "Failed to delete inventory item.",
+        "error",
       );
     } finally {
       setIsSubmitting(false);

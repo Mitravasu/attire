@@ -80,8 +80,8 @@ export function OutfitsPage() {
           ) : null}
           {!isLoading && !error && outfits.length === 0 ? (
             <EmptyState
-              title="No outfits saved yet"
-              description="Build an outfit from the Home screen to populate this library."
+              title="No outfits in the library yet"
+              description="Build a draft outfit on Home and save it to start filling this gallery with reusable looks."
             />
           ) : null}
           {!isLoading && !error && outfits.length > 0 ? (

@@ -8,10 +8,11 @@ import {
 type Toast = {
   id: number;
   message: string;
+  tone: "info" | "success" | "error";
 };
 
 type ToastContextValue = {
-  pushToast: (message: string) => void;
+  pushToast: (message: string, tone?: Toast["tone"]) => void;
 };
 
 const ToastContext = createContext<ToastContextValue | null>(null);
@@ -23,9 +24,9 @@ type ToastProviderProps = {
 export function ToastProvider({ children }: ToastProviderProps) {
   const [toasts, setToasts] = useState<Toast[]>([]);
 
-  const pushToast = (message: string) => {
+  const pushToast = (message: string, tone: Toast["tone"] = "info") => {
     const id = Date.now();
-    setToasts((current) => [...current, { id, message }]);
+    setToasts((current) => [...current, { id, message, tone }]);
     window.setTimeout(() => {
       setToasts((current) => current.filter((toast) => toast.id !== id));
     }, 3000);
@@ -41,7 +42,11 @@ export function ToastProvider({ children }: ToastProviderProps) {
         data-testid="toast-stack"
       >
         {toasts.map((toast) => (
-          <div key={toast.id} className="toast" data-testid="toast">
+          <div
+            key={toast.id}
+            className={`toast toast--${toast.tone}`}
+            data-testid="toast"
+          >
             {toast.message}
           </div>
         ))}
