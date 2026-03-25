@@ -1,0 +1,12 @@
+node_modules/
+dist/
+build/
+.env
+.env.local
+.env.*.local
+coverage/
+playwright-report/
+test-results/
+backend/uploads/*
+!backend/uploads/.gitkeep
+node_modules

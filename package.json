@@ -1,0 +1,23 @@
+{
+  "name": "attire",
+  "private": true,
+  "workspaces": [
+    "frontend",
+    "backend"
+  ],
+  "scripts": {
+    "dev:frontend": "npm run dev --workspace frontend",
+    "dev:backend": "npm run dev --workspace backend",
+    "dev:e2e:frontend": "npm run dev --workspace frontend -- --host 127.0.0.1 --port 4173",
+    "dev:e2e:backend": "PORT=3001 CLIENT_ORIGIN=http://127.0.0.1:4173 npm run dev --workspace backend",
+    "build": "npm run build --workspace frontend && npm run build --workspace backend",
+    "lint": "npm run lint --workspace frontend && npm run lint --workspace backend",
+    "test:e2e": "playwright test",
+    "test:e2e:headed": "playwright test --headed",
+    "test:e2e:debug": "playwright test --debug",
+    "test:e2e:install": "playwright install chromium"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.58.2"
+  }
+}

@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="240" height="320" viewBox="0 0 240 320">
+  <rect width="240" height="320" fill="#e9d9ef" />
+  <rect x="32" y="48" width="176" height="224" rx="20" fill="#4e285f" />
+  <text x="120" y="150" fill="#ffffff" font-family="Arial, sans-serif" font-size="24" text-anchor="middle">Back</text>
+  <text x="120" y="186" fill="#ffffff" font-family="Arial, sans-serif" font-size="18" text-anchor="middle">E2E Item</text>
+</svg>
