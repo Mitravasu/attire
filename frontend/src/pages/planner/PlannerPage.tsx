@@ -235,11 +235,12 @@ export function PlannerPage() {
             Selected days: {selectedDates.length}
           </span>
           {selectedDates.length ? (
-            <Button onClick={() => setSelectedDates([])} variant="ghost">
+            <Button data-testid="planner-clear-selection" onClick={() => setSelectedDates([])} variant="ghost">
               Clear Selection
             </Button>
           ) : null}
           <Button
+            data-testid="planner-export-pdf"
             disabled={!selectedDates.length || isExporting}
             onClick={() => void handleExportPdf()}
           >

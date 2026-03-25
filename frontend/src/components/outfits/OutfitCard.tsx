@@ -9,7 +9,7 @@ type OutfitCardProps = {
 
 export function OutfitCard({ outfit, onDelete, onEdit }: OutfitCardProps) {
   return (
-    <article className="outfit-card" data-testid={`outfit-card-${outfit.id}`}>
+    <article className="outfit-card" data-testid={`outfit-card-root-${outfit.id}`}>
       <div className="outfit-card__preview">
         {outfit.items.slice(0, 4).map((item) => (
           <img key={item.id} alt={item.title} src={item.frontImageUrl} />
@@ -17,7 +17,7 @@ export function OutfitCard({ outfit, onDelete, onEdit }: OutfitCardProps) {
       </div>
       <div className="outfit-card__body">
         <div className="outfit-card__header">
-          <h3 data-testid={`outfit-card-title-${outfit.id}`}>{outfit.name}</h3>
+          <h3 data-testid={`outfit-card-name-${outfit.id}`}>{outfit.name}</h3>
           <div className="outfit-card__actions outfit-card__actions--desktop">
             <Button
               data-testid={`outfit-card-edit-${outfit.id}`}

@@ -122,7 +122,12 @@ export function EditOutfitModal({
           </>
         }
       >
-        <form className="modal-form" id="edit-outfit-form" onSubmit={handleSubmit}>
+        <form
+          className="modal-form"
+          data-testid="edit-outfit-form"
+          id="edit-outfit-form"
+          onSubmit={handleSubmit}
+        >
           <Input
             id="edit-outfit-name"
             label="Outfit Name"
@@ -132,9 +137,13 @@ export function EditOutfitModal({
           <div className="outfit-builder">
             <section className="outfit-builder__column">
               <h3>Selected Items</h3>
-              <ul className="outfit-builder__list">
+              <ul className="outfit-builder__list" data-testid="outfit-selected-items">
                 {selectedItems.map((item) => (
-                  <li key={item.id} className="outfit-builder__item">
+                  <li
+                    key={item.id}
+                    className="outfit-builder__item"
+                    data-testid={`outfit-selected-item-${item.id}`}
+                  >
                     <img alt={item.title} src={item.frontImageUrl} />
                     <div>
                       <strong>{item.title}</strong>
@@ -143,6 +152,7 @@ export function EditOutfitModal({
                       </p>
                     </div>
                     <Button
+                      data-testid={`outfit-selected-remove-${item.id}`}
                       onClick={() =>
                         setSelectedItems((current) =>
                           current.filter((entry) => entry.id !== item.id),
@@ -160,9 +170,13 @@ export function EditOutfitModal({
             <section className="outfit-builder__column">
               <h3>Available Items</h3>
               {isLoadingInventory ? <p className="outfit-builder__hint">Loading inventory...</p> : null}
-              <ul className="outfit-builder__list">
+              <ul className="outfit-builder__list" data-testid="outfit-available-items">
                 {availableToAdd.map((item) => (
-                  <li key={item.id} className="outfit-builder__item">
+                  <li
+                    key={item.id}
+                    className="outfit-builder__item"
+                    data-testid={`outfit-available-item-${item.id}`}
+                  >
                     <img alt={item.title} src={item.frontImageUrl} />
                     <div>
                       <strong>{item.title}</strong>
@@ -171,6 +185,7 @@ export function EditOutfitModal({
                       </p>
                     </div>
                     <Button
+                      data-testid={`outfit-available-add-${item.id}`}
                       onClick={() =>
                         setSelectedItems((current) => {
                           if (current.some((entry) => entry.id === item.id)) {
