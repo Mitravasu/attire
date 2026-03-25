@@ -2,9 +2,11 @@ import { FormEvent, useMemo, useState } from "react";
 import { updateInventoryItem } from "api/inventory/updateInventoryItem";
 import { useToast } from "components/feedback/ToastProvider";
 import { Button } from "components/ui/Button";
+import { DiscardChangesModal } from "components/ui/DiscardChangesModal";
 import { Input } from "components/ui/Input";
 import { Modal } from "components/ui/Modal";
 import { Select } from "components/ui/Select";
+import { useBeforeUnload } from "lib/useBeforeUnload";
 import { InventoryItem, InventoryStatus, InventoryType } from "types/inventory";
 import {
   InventoryFormErrors,
@@ -27,12 +29,35 @@ export function EditItemModal({
   onSuccess,
 }: EditItemModalProps) {
   const { pushToast } = useToast();
-  const [formState, setFormState] = useState<InventoryFormState>(
-    inventoryItemToFormState(item),
-  );
+  const initialFormState = useMemo(() => inventoryItemToFormState(item), [item]);
+  const [formState, setFormState] = useState<InventoryFormState>(initialFormState);
   const [errors, setErrors] = useState<InventoryFormErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isDiscardModalOpen, setIsDiscardModalOpen] = useState(false);
   const tagPreview = useMemo(() => parseTags(formState.tags), [formState.tags]);
+  const isDirty =
+    formState.title !== initialFormState.title ||
+    formState.tags !== initialFormState.tags ||
+    formState.color !== initialFormState.color ||
+    formState.type !== initialFormState.type ||
+    formState.status !== initialFormState.status ||
+    formState.frontImageUrl !== initialFormState.frontImageUrl ||
+    formState.backImageUrl !== initialFormState.backImageUrl;
+
+  useBeforeUnload(isDirty);
+
+  function handleRequestClose() {
+    if (isSubmitting) {
+      return;
+    }
+
+    if (isDirty) {
+      setIsDiscardModalOpen(true);
+      return;
+    }
+
+    onClose();
+  }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -70,14 +95,23 @@ export function EditItemModal({
     }
   }
 
+  if (isDiscardModalOpen) {
+    return (
+      <DiscardChangesModal
+        onDiscard={onClose}
+        onKeepEditing={() => setIsDiscardModalOpen(false)}
+      />
+    );
+  }
+
   return (
-    <div className="modal-overlay" role="presentation">
       <Modal
+        onRequestClose={handleRequestClose}
         title="Edit Item"
         description="Update the item details below. Current images are shown for reference, and you can replace either image."
         footer={
           <>
-            <Button onClick={onClose} variant="ghost">
+            <Button onClick={handleRequestClose} variant="ghost">
               Cancel
             </Button>
             <Button form="edit-item-form" type="submit">
@@ -217,6 +251,5 @@ export function EditItemModal({
           {errors.submit ? <p className="field__error">{errors.submit}</p> : null}
         </form>
       </Modal>
-    </div>
   );
 }

@@ -17,7 +17,9 @@ import { InventoryGrid } from "components/inventory/InventoryGrid";
 import { InventoryGridSkeleton } from "components/inventory/InventoryGridSkeleton";
 import { Button } from "components/ui/Button";
 import { Card } from "components/ui/Card";
+import { DiscardChangesModal } from "components/ui/DiscardChangesModal";
 import { Pagination } from "components/ui/Pagination";
+import { useBeforeUnload } from "lib/useBeforeUnload";
 import { FilterOptions } from "types/filterOptions";
 import { InventoryFilters, InventoryItem } from "types/inventory";
 
@@ -46,6 +48,10 @@ export function HomePage() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<InventoryItem | null>(null);
   const [deletingItem, setDeletingItem] = useState<InventoryItem | null>(null);
+  const [isDraftDiscardModalOpen, setIsDraftDiscardModalOpen] = useState(false);
+  const isDraftDirty = draftItems.length > 0 || outfitName.trim().length > 0;
+
+  useBeforeUnload(isDraftDirty);
 
   async function handleToggleFavorite(item: InventoryItem) {
     const nextFavorite = !item.favorite;
@@ -88,9 +94,22 @@ export function HomePage() {
   }
 
   function handleClearDraft() {
+    if (isDraftDirty) {
+      setIsDraftDiscardModalOpen(true);
+      return;
+    }
+
     setDraftItems([]);
     setOutfitName("");
     setDraftError(null);
+    pushToast("Draft outfit cleared.");
+  }
+
+  function confirmClearDraft() {
+    setDraftItems([]);
+    setOutfitName("");
+    setDraftError(null);
+    setIsDraftDiscardModalOpen(false);
     pushToast("Draft outfit cleared.");
   }
 
@@ -323,6 +342,12 @@ export function HomePage() {
             setDeletingItem(null);
             setRequestVersion((current) => current + 1);
           }}
+        />
+      ) : null}
+      {isDraftDiscardModalOpen ? (
+        <DiscardChangesModal
+          onDiscard={confirmClearDraft}
+          onKeepEditing={() => setIsDraftDiscardModalOpen(false)}
         />
       ) : null}
     </PageLayout>

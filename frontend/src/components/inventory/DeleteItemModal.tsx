@@ -35,33 +35,30 @@ export function DeleteItemModal({
   }
 
   return (
-    <div className="modal-overlay" role="presentation">
-      <ConfirmationModal
-        cancelLabel="Cancel"
-        confirmLabel={isSubmitting ? "Deleting..." : "Delete Item"}
-        description={`Delete ${item.title}? This removes it from the inventory grid.`}
-        onCancel={isSubmitting ? undefined : onClose}
-        onConfirm={isSubmitting ? undefined : handleConfirm}
-        title="Delete Item"
-      >
-        <div className="delete-item-preview">
-          <div className="delete-item-preview__media">
-            <img alt={item.title} src={item.frontImageUrl} />
-          </div>
-          <div className="delete-item-preview__details">
-            <h3>{item.title}</h3>
-            <p>
-              {item.color} · {item.type} · {item.status}
-            </p>
-            <ul className="inventory-card__tags" aria-label={`${item.title} tags`}>
-              {item.tags.map((tag) => (
-                <li key={tag}>{tag}</li>
-              ))}
-            </ul>
-          </div>
+    <ConfirmationModal
+      cancelLabel="Cancel"
+      confirmLabel={isSubmitting ? "Deleting..." : "Delete Item"}
+      description={`Delete ${item.title}? This removes it from the inventory grid.`}
+      onCancel={isSubmitting ? undefined : onClose}
+      onConfirm={isSubmitting ? undefined : handleConfirm}
+      title="Delete Item"
+    >
+      <div className="delete-item-preview">
+        <div className="delete-item-preview__media">
+          <img alt={item.title} src={item.frontImageUrl} />
         </div>
-      </ConfirmationModal>
-    </div>
+        <div className="delete-item-preview__details">
+          <h3>{item.title}</h3>
+          <p>
+            {item.color} · {item.type} · {item.status}
+          </p>
+          <ul className="inventory-card__tags" aria-label={`${item.title} tags`}>
+            {item.tags.map((tag) => (
+              <li key={tag}>{tag}</li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    </ConfirmationModal>
   );
 }
-

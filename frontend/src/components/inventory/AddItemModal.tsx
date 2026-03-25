@@ -2,9 +2,11 @@ import { FormEvent, useMemo, useState } from "react";
 import { createInventoryItem } from "api/inventory/createInventoryItem";
 import { useToast } from "components/feedback/ToastProvider";
 import { Button } from "components/ui/Button";
+import { DiscardChangesModal } from "components/ui/DiscardChangesModal";
 import { Input } from "components/ui/Input";
 import { Modal } from "components/ui/Modal";
 import { Select } from "components/ui/Select";
+import { useBeforeUnload } from "lib/useBeforeUnload";
 import { InventoryStatus, InventoryType } from "types/inventory";
 import {
   InventoryFormErrors,
@@ -27,7 +29,31 @@ export function AddItemModal({ onClose, onSuccess }: AddItemModalProps) {
   );
   const [errors, setErrors] = useState<InventoryFormErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isDiscardModalOpen, setIsDiscardModalOpen] = useState(false);
   const tagPreview = useMemo(() => parseTags(formState.tags), [formState.tags]);
+  const isDirty =
+    formState.title.trim().length > 0 ||
+    formState.tags.trim().length > 0 ||
+    formState.color.trim().length > 0 ||
+    formState.type !== initialInventoryFormState.type ||
+    formState.status !== initialInventoryFormState.status ||
+    formState.frontImageUrl.length > 0 ||
+    formState.backImageUrl.length > 0;
+
+  useBeforeUnload(isDirty);
+
+  function handleRequestClose() {
+    if (isSubmitting) {
+      return;
+    }
+
+    if (isDirty) {
+      setIsDiscardModalOpen(true);
+      return;
+    }
+
+    onClose();
+  }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -64,14 +90,23 @@ export function AddItemModal({ onClose, onSuccess }: AddItemModalProps) {
     }
   }
 
+  if (isDiscardModalOpen) {
+    return (
+      <DiscardChangesModal
+        onDiscard={onClose}
+        onKeepEditing={() => setIsDiscardModalOpen(false)}
+      />
+    );
+  }
+
   return (
-    <div className="modal-overlay" role="presentation">
       <Modal
+        onRequestClose={handleRequestClose}
         title="Add Item"
         description="Add a new clothing item with required front imagery, optional back imagery, and wardrobe metadata."
         footer={
           <>
-            <Button onClick={onClose} variant="ghost">
+            <Button onClick={handleRequestClose} variant="ghost">
               Cancel
             </Button>
             <Button form="add-item-form" type="submit">
@@ -199,6 +234,5 @@ export function AddItemModal({ onClose, onSuccess }: AddItemModalProps) {
           {errors.submit ? <p className="field__error">{errors.submit}</p> : null}
         </form>
       </Modal>
-    </div>
   );
 }

@@ -33,28 +33,25 @@ export function DeleteOutfitModal({
   }
 
   return (
-    <div className="modal-overlay" role="presentation">
-      <ConfirmationModal
-        cancelLabel="Cancel"
-        confirmLabel={isSubmitting ? "Deleting..." : "Delete Outfit"}
-        description={`Delete ${outfit.name}? Inventory items will remain untouched.`}
-        onCancel={isSubmitting ? undefined : onClose}
-        onConfirm={isSubmitting ? undefined : handleConfirm}
-        title="Delete Outfit"
-      >
-        <div className="delete-outfit-preview">
-          <div className="delete-outfit-preview__images">
-            {outfit.items.slice(0, 4).map((item) => (
-              <img key={item.id} alt={item.title} src={item.frontImageUrl} />
-            ))}
-          </div>
-          <div className="delete-outfit-preview__details">
-            <h3>{outfit.name}</h3>
-            <p>{outfit.items.length} items will remain in inventory.</p>
-          </div>
+    <ConfirmationModal
+      cancelLabel="Cancel"
+      confirmLabel={isSubmitting ? "Deleting..." : "Delete Outfit"}
+      description={`Delete ${outfit.name}? Inventory items will remain untouched.`}
+      onCancel={isSubmitting ? undefined : onClose}
+      onConfirm={isSubmitting ? undefined : handleConfirm}
+      title="Delete Outfit"
+    >
+      <div className="delete-outfit-preview">
+        <div className="delete-outfit-preview__images">
+          {outfit.items.slice(0, 4).map((item) => (
+            <img key={item.id} alt={item.title} src={item.frontImageUrl} />
+          ))}
         </div>
-      </ConfirmationModal>
-    </div>
+        <div className="delete-outfit-preview__details">
+          <h3>{outfit.name}</h3>
+          <p>{outfit.items.length} items will remain in inventory.</p>
+        </div>
+      </div>
+    </ConfirmationModal>
   );
 }
-

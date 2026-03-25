@@ -3,8 +3,10 @@ import { listInventory } from "api/inventory/listInventory";
 import { updateOutfit } from "api/outfits/updateOutfit";
 import { useToast } from "components/feedback/ToastProvider";
 import { Button } from "components/ui/Button";
+import { DiscardChangesModal } from "components/ui/DiscardChangesModal";
 import { Input } from "components/ui/Input";
 import { Modal } from "components/ui/Modal";
+import { useBeforeUnload } from "lib/useBeforeUnload";
 import { Outfit } from "types/outfit";
 import { InventoryItem } from "types/inventory";
 
@@ -26,6 +28,26 @@ export function EditOutfitModal({
   const [isLoadingInventory, setIsLoadingInventory] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isDiscardModalOpen, setIsDiscardModalOpen] = useState(false);
+  const isDirty =
+    name !== outfit.name ||
+    selectedItems.map((item) => item.id).join("|") !==
+      outfit.items.map((item) => item.id).join("|");
+
+  useBeforeUnload(isDirty);
+
+  function handleRequestClose() {
+    if (isSaving) {
+      return;
+    }
+
+    if (isDirty) {
+      setIsDiscardModalOpen(true);
+      return;
+    }
+
+    onClose();
+  }
 
   useEffect(() => {
     let cancelled = false;
@@ -106,14 +128,23 @@ export function EditOutfitModal({
     }
   }
 
+  if (isDiscardModalOpen) {
+    return (
+      <DiscardChangesModal
+        onDiscard={onClose}
+        onKeepEditing={() => setIsDiscardModalOpen(false)}
+      />
+    );
+  }
+
   return (
-    <div className="modal-overlay" role="presentation">
       <Modal
+        onRequestClose={handleRequestClose}
         title="Edit Outfit"
         description="Update the outfit name and adjust the selected inventory items."
         footer={
           <>
-            <Button onClick={onClose} variant="ghost">
+            <Button onClick={handleRequestClose} variant="ghost">
               Cancel
             </Button>
             <Button form="edit-outfit-form" type="submit">
@@ -208,6 +239,5 @@ export function EditOutfitModal({
           {error ? <p className="field__error">{error}</p> : null}
         </form>
       </Modal>
-    </div>
   );
 }

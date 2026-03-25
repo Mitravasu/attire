@@ -25,6 +25,7 @@ export function ConfirmationModal({
 }: ConfirmationModalProps) {
   return (
     <Modal
+      onRequestClose={onCancel}
       title={title}
       description={description}
       footer={

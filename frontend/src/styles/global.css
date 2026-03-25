@@ -92,6 +92,15 @@ select {
   color: #fff;
 }
 
+a:focus-visible,
+.button:focus-visible,
+.field__control:focus-visible,
+.pagination__button:focus-visible,
+.checkbox input:focus-visible {
+  outline: 3px solid rgba(46, 91, 79, 0.28);
+  outline-offset: 3px;
+}
+
 .app-shell__content {
   margin-top: 24px;
 }
@@ -573,7 +582,11 @@ select {
 
 .modal {
   width: min(720px, 100%);
+  max-height: calc(100vh - 48px);
+  display: flex;
+  flex-direction: column;
   padding: 24px;
+  overflow: hidden;
 }
 
 .modal-form {
@@ -687,11 +700,14 @@ select {
 
 .modal__body {
   margin-top: 20px;
+  overflow: auto;
+  padding-right: 4px;
 }
 
 .modal__footer {
   display: flex;
   justify-content: flex-end;
+  flex-wrap: wrap;
   gap: 12px;
   margin-top: 20px;
 }
